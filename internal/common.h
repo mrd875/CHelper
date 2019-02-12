@@ -2,6 +2,7 @@
 #define __CHELPCOMMONINTERN__
 
 #include "../string.h"
+#include <stdio.h>
 
 #ifdef __CHELPDEBUG__
 #define debugp(...)               \

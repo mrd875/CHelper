@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "label": "build default",
+        "type": "shell",
+        "command": "mingw32-make",
+        "args": [
+            ""
+        ],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    },
+    {
+        "label": "build test list",
+        "type": "shell",
+        "command": "mingw32-make",
+        "args": [
+            "testlist"
+        ],
+        "problemMatcher": []
+    }
+]
+}

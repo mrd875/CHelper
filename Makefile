@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g
+CFLAGS = -g #-D __CHELPDEBUG__
 CPPFLAGS = -std=gnu99 -Wall -Wextra -pedantic
 
 TARGETS = $(LIBCHELPER)
@@ -67,6 +67,7 @@ $(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/common.h $(SRC)/list.h $(SRC)/stri
 $(LIBCHELPER): $(OBJ)/internal/common.o $(OBJ)/common.o $(OBJ)/string.o $(OBJ)/list.o
 	@echo "ar $@"
 	@ar rcs $@ $^
+	@echo ""
 
 
 $(OBJ)/internal/common.o: $(SRC)/internal/common.c $(SRC)/internal/common.h $(SRC)/string.h

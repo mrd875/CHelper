@@ -52,15 +52,28 @@ String StringReplace(String src, String replace, String with)
     assert(replace != NULL);
     assert(with != NULL);
 
+    result = StringCopy(src);
+
     return result;
 }
 
 List StringSplitIntoList(String src, String delims)
 {
+    String token, rest, copy;
     List result;
 
     assert(src != NULL);
     assert(delims != NULL);
 
+    copy = StringCopy(src);
+    result = ListCreate(-1);
+
+    rest = copy;
+    while ((token = strtok_r(rest, delims, &rest)) != NULL)
+    {
+        ListAddLast(result, StringCopy(token), &free, &CopyString);
+    }
+
+    free(copy);
     return result;
 }
