@@ -1,14 +1,16 @@
 #ifndef __CHELPCOMMON__
 #define __CHELPCOMMON__
 
-#define RETURN_SUCCESS 0
-#define is_true(a) (a == RETURN_SECCESS)
-
 #include "string.h"
 
 /*
     Prints the last error message.
 */
 void PrintError(String calledFrom);
+
+/*
+    Creates an int. Free afterwards.
+*/
+int *QuickCreateInt(int i);
 
 #endif /* __CHELPCOMMON__ */

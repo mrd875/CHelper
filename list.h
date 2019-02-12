@@ -1,230 +1,216 @@
-/*
-    Mason Demerais
-    mrd875
-    11202338
-*/
+#ifndef __CHELPLIST__
+#define __CHELPLIST__
 
-#ifndef __LIST__
-#define __LIST__
+#include <stdbool.h>
 
 /*
-    This is the structure of a List.
+    This is the data type for lists.
 */
 typedef struct List *List;
 
 /*
-    This is a List iterator.
+    This is the data type for list iterators.
 */
-typedef struct ListNode *ListIterator;
+typedef struct ListIterator *ListIterator;
 
 /*
-    Initiates the List, returns a pointer to the caller, be sure to free the List with free_List().
+    Returns a newly created list. For unlimited size, set to -1.
 */
-List *ListInit();
+List ListCreate(int size);
 
 /*
-    Frees the List, will also free all data inside the List for the caller.
+    Frees the list, will also free all data inside the list for the caller.
 */
-void ListFree(List *the_List);
+void ListFree(List l);
 
 /*
-    Empties the List.
+    Empties the List. All data inside is free'd.
 */
-void ListClear(List *the_List);
+void ListClear(List l);
 
 /*
     Returns how many elements are in the List.
 */
-int ListSize(List *the_List);
+int ListSize(List l);
 
 /*
-    Returns the cursor of the List.
+    Returns the capacity of the list.
 */
-ListIterator *ListGetCurrentListIterator(List *the_List);
+int ListCapacity(List l);
 
 /*
-    Returns a List iterator at the List's head.
+    Returns if the list is full.
 */
-ListIterator *ListGetHeadListIterator(List *the_List);
+bool ListFull(List l);
 
 /*
-    Returns a List iterator at the List's tail.
+    Returns if the list is empty.
 */
-ListIterator *ListGetTailListIterator(List *the_List);
+bool ListEmpty(List l);
 
 /*
-    Returns a List iterator at the ListIterator's next.
+    Returns the list iterator at the list's last operation. Be sure to free.
 */
-ListIterator *ListIteratorGetNext(ListIterator *the_iter);
+ListIterator ListGetCursorListIterator(List l);
 
 /*
-    Returns a List iterator at the ListIterator's before.
+    Returns a List iterator just before the list's head. Be sure to free.
 */
-ListIterator *ListIteratorGetBefore(ListIterator *the_iter);
+ListIterator ListGetHeadListIterator(List l);
 
 /*
-    Returns an iterator that is pointed at the found element next from the ListIterator. Returns NULL if not found.
+    Returns a List iterator just after the list's tail. Be sure to free.
 */
-ListIterator *ListIteratorSearchNext(ListIterator *the_iter, int (*comparator)(void *, void *), void *comparisonArg);
+ListIterator ListGetTailListIterator(List l);
 
 /*
-    Returns an iterator that is pointed at the found element before from the ListIterator. Returns NULL if not found.
+    Returns the address of the first element in the List, will return NULL if there isn't one.
 */
-ListIterator *ListIteratorSearchBefore(ListIterator *the_iter, int (*comparator)(void *, void *), void *comparisonArg);
+void *ListGetFirst(List l);
 
 /*
-    Returns 0 if the ListIterator is a head.
+    Returns the address of the last element in the List, will return NULL if there isn't one.
 */
-int ListIteratorIsHead(ListIterator *the_iter);
+void *ListGetLast(List l);
 
 /*
-    Returns 0 if the ListIterator is a tail.
+    Returns the address of the x'th element in the List, will return NULL if there isn't one.
 */
-int ListIteratorIsTail(ListIterator *the_iter);
+void *ListGetX(List l, int x);
 
 /*
-    Returns 0 if the ListIterator has a before.
+    Adds the given data to the start of the List, returns if it was successful. free and copy are pointers to functions that know how to free and copy the data.
 */
-int ListIteratorHasBefore(ListIterator *the_iter);
+bool ListAddFirst(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
 
 /*
-    Returns 0 if the ListIterator has a next.
+    Adds the given data to the end of the List, returns if it was successful.
 */
-int ListIteratorHasNext(ListIterator *the_iter);
+bool ListAddLast(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
 
 /*
-    Returns the data at the ListIterator. Sets size.
+    Adds the given data at the x'th spot of the List (pushes everything else after futher down the List), returns if it was successful.
 */
-void *ListIteratorGetData(ListIterator *the_iter, int *size);
+bool ListAddX(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data), int x);
 
 /*
-    Changes the ListIterator's data. Returns the address if successful. NULL otherwise.
+    Changes the data at the x'th spot in the List, will free the old data. Returns if it was successful.
 */
-void *ListIteratorChange(ListIterator *the_iter, void *data, int size, void (*free_routine)(void *data));
+bool ListChangeX(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data), int x);
 
 /*
-    Adds item to List before the ListIterator. Returns the ListIterator of data added if successful, NULL otherwise.
+    Deletes and frees the data found at the end of the List. Returns if successful.
 */
-ListIterator *ListIteratorAddBefore(ListIterator *the_iter, void *data, int size, void (*free_routine)(void *data));
+bool ListDeleteLast(List l);
 
 /*
-    Adds item to List after the ListIterator. Returns the ListIterator of data added if successful, NULL otherwise.
+    Deletes and frees the data found at the start of the List. Returns if successful.
 */
-ListIterator *ListIteratorAddAfter(ListIterator *the_iter, void *data, int size, void (*free_routine)(void *data));
+bool ListDeleteFirst(List l);
 
 /*
-    Deletes the entry at ListIterator and returns the before ListIterator. NULL if there isn't one.
+    Deletes and frees the data found at the x'th spot of the List. Returns if successful.
 */
-ListIterator *ListIteratorDeleteAndGoBefore(ListIterator *the_iter);
-
-/*
-    Deletes the entry at ListIterator and returns the next ListIterator. NULL if there isn't one.
-*/
-ListIterator *ListIteratorDeleteAndGoNext(ListIterator *the_iter);
-
-/*
-    Returns the address of the first element in the List, will return NULL if there isn't one. Size gets updated to the size of bytes of the data.
-*/
-void *ListGetFirst(List *the_List, int *size);
-
-/*
-    Returns the address of the last element in the List, will return NULL if there isn't one. Size gets updated to the size of bytes of the data.
-*/
-void *ListGetLast(List *the_List, int *size);
-
-/*
-    Returns the address of the x'th element in the List, will return NULL if there isn't one. Size gets updated to the size of bytes of the data.
-*/
-void *ListGetX(List *the_List, int *size, int x);
-
-/*
-    Adds the given data to the start of the List, returns the address of the data added if successful, NULL otherwise.
-*/
-void *ListAddFirst(List *the_List, void *data, int size, void (*free_routine)(void *data));
-
-/*
-    Adds the given data to the end of the List, returns the address of the data added if successful, NULL otherwise.
-*/
-void *ListAddLast(List *the_List, void *data, int size, void (*free_routine)(void *data));
-
-/*
-    Adds the given data at the x'th spot of the List (pushes everything else after futher down the List), returns the address of the data added if successful, NULL otherwise.
-*/
-void *ListAddX(List *the_List, void *data, int size, void (*free_routine)(void *data), int x);
-
-/*
-    Changes the data at the x'th spot in the List, will free the old data. Returns the address of the data changed if successful, NULL otherwise.
-*/
-void *ListChangeX(List *the_List, void *data, int size, void (*free_routine)(void *data), int x);
-
-/*
-    Deletes and frees the data found at the end of the List. Returns 0 if successful.
-*/
-int ListDeleteLast(List *the_List);
-
-/*
-    Deletes and frees the data found at the start of the List. Returns 0 if successful.
-*/
-int ListDeleteFirst(List *the_List);
-
-/*
-    Deletes and frees the data found at the x'th spot of the List. Returns 0 if successful.
-*/
-int ListDeleteX(List *the_List, int x);
+bool ListDeleteX(List l, int x);
 
 /*
     Searches the List given a compare function and compare argument, will return the index of the found element, -1 if not found.
 */
-int ListSearch(List *the_List, int (*comparator)(void *, void *), void *comparisonArg);
+int ListSearch(List l, bool (*comparator)(void *, void *), void *comparisonArg);
 
 /*
     Searches the List given a compare function and compare argument, will return the amount of times the element was found.
 */
-int ListCount(List *the_List, int (*comparator)(void *, void *), void *comparisonArg);
+int ListCount(List l, bool (*comparator)(void *, void *), void *comparisonArg);
 
 /*
-    Concats the second List to the first. Returns the concat'd List. Destroys the second List.
+    Concats the second List to the first. Returns if successful. Second list is emptied, not free'd!
 */
-List *ListConcat(List *the_List, List *two_List);
+bool ListConcat(List l, List l2);
 
 /*
     Copies the List and returns it.
 */
-List *ListCopy(List *the_List);
+List ListCopy(List l);
 
 /*
     Does the function on every element of the List.
 */
-void ListForEach(List *the_List, void (*func)(void *, int i));
+void ListForEach(List l, void (*func)(void *, int i));
 
 /*
     Filters the List.
 */
-void ListFilter(List *the_List, int (*comparator)(void *, void *), void *comparisonArg);
+void ListFilter(List l, bool (*comparator)(void *, void *), void *comparisonArg);
 
 /*
     For debugging purposes: Prints everyelement as a string.
 */
-void ListDebugPrintString(List *L);
+void ListDebugPrintString(List l);
 
 /*
     For debugging purposes: Prints everyelement as an int.
 */
-void ListDebugPrintInt(List *L);
+void ListDebugPrintInt(List l);
 
 /*
-    Mallocs and inserts i and returns the address.
+    Frees the list iterator.
 */
-int *qcint(int i);
+void ListIteratorFree(ListIterator li);
 
 /*
-    Mallocs and inserts the string and returns the address.
+    List iterator goes to next thing in the list. Returns if successful.
 */
-char *qcstring(char *s);
+bool ListIteratorNext(ListIterator li);
 
 /*
-    Runs the test cases.
+    List iterator goes to next thing in the list. Returns if successful.
 */
-void test_List();
+bool ListIteratorPrevious(ListIterator li);
 
-#endif /* __LIST__ */
+/*
+    Returns if the iterator is on a null spot of the list (edges).
+*/
+bool ListIteratorIsNull(ListIterator li);
+
+/*
+    List iterator goes to next element that is true for the search. Returns if it was successful.
+*/
+bool ListIteratorSearchNext(ListIterator li, bool (*comparator)(void *, void *), void *comparisonArg);
+
+/*
+    List iterator goes to before element that is true for the search. Returns if it was successful.
+*/
+bool ListIteratorSearchPrevious(ListIterator li, bool (*comparator)(void *, void *), void *comparisonArg);
+
+/*
+    Returns if the list iterator has next.
+*/
+bool ListIteratorHasNext(ListIterator li);
+
+/*
+    Returns if the list iterator has before.
+*/
+bool ListIteratorHasPrevious(ListIterator li);
+
+/*
+    Returns the data at the ListIterator.
+*/
+void *ListIteratorGet(ListIterator li);
+
+/*
+    Changes the ListIterator's data. Returns if successful.
+*/
+bool ListIteratorChange(ListIterator li, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
+
+/*
+    Adds item to List before the ListIterator. Returns if the list iterator was successful.
+*/
+bool ListIteratorAdd(ListIterator li, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
+
+/*
+    Deletes the entry at ListIterator and goes before. Returns if successful.
+*/
+bool ListIteratorDelete(ListIterator li);
+
+#endif /* __CHELPLIST__ */

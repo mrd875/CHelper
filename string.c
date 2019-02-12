@@ -32,7 +32,7 @@ String StringGetSubString(String src, int i, int size)
     assert(size >= 0);
 
     slen = strlen(src);
-    assert(i > slen);
+    assert(i < slen);
 
     debugp("Getting substr");
     result = calloc(sizeof(char), size + 1);
