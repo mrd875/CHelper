@@ -37,3 +37,8 @@ void *CopyInt(void *a)
 
     return (void *)QuickCreateInt(i);
 }
+
+void *CopyString(void *a)
+{
+    return (void *)StringCopy((String)a);
+}

@@ -1,26 +1,22 @@
-# Mason Demerais
-# mrd875
-# 11202338
-
-
 CC = gcc
 CFLAGS = -g
 CPPFLAGS = -std=gnu99 -Wall -Wextra -pedantic
 
-TARGETS = 
+TARGETS = $(LIBCHELPER)
 
 
 PLATFORM = $(shell uname -s)
 ARCH = $(shell uname -m)
 
-BUILD = ./build
+BUILD = ./build/$(PLATFORM)$(ARCH)
 
 OBJ = $(BUILD)/obj
 BIN = $(BUILD)/bin
 LIB = $(BUILD)/lib
 SRC = .
 
-TESTLIST = $(BUILD)/testlist
+LIBCHELPER = $(LIB)/libCHelper.a
+TESTLIST = $(BIN)/testlist
 
 
 .phony:	all
@@ -50,29 +46,32 @@ clean-all: clean-binary clean
 	@echo "cleaning all"
 	@rm -rf $(BUILD)
 
-listtest: mkdirs $(TESTLIST)
+testlist: mkdirs $(TESTLIST)
+libchelper: mkdirs $(LIBCHELPER)
 
 
 
-$(TESTLIST): $(OBJ)/test/list.o $(OBJ)/common.o $(OBJ)/list.o $(OBJ)/internal/common.o $(OBJ)/string.o
+$(TESTLIST): $(OBJ)/test/list.o $(LIBCHELPER)
 	@echo "$(CC) $@"
 	@$(CC) -o $@ $(CFLAGS) $^
 	@echo "finished $@"
 	@echo ""
 
-$(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/common.h $(SRC)/list.h
+$(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/common.h $(SRC)/list.h $(SRC)/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
 
+
+
+$(LIBCHELPER): $(OBJ)/internal/common.o $(OBJ)/common.o $(OBJ)/string.o $(OBJ)/list.o
+	@echo "ar $@"
+	@ar rcs $@ $^
 
 
 $(OBJ)/internal/common.o: $(SRC)/internal/common.c $(SRC)/internal/common.h $(SRC)/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
-
-
-
 
 $(OBJ)/common.o: $(SRC)/common.c $(SRC)/common.h $(SRC)/internal/common.h $(SRC)/string.h
 	@echo "$(CC) $@"

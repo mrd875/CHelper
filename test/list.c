@@ -1,7 +1,9 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "../common.h"
 #include "../list.h"
+#include "../string.h"
 
 int main(void)
 {
@@ -15,6 +17,8 @@ int main(void)
         ListAddFirst(l, QuickCreateInt(i), &free, &CopyInt);
     }
 
+    ListCursorBeforeHead(l);
+
     ListAddX(l, QuickCreateInt(5), &free, &CopyInt, 5);
 
     ListDeleteFirst(l);
@@ -27,7 +31,19 @@ int main(void)
 
     ListDeleteX(l, 1);
 
+    ListAddFirst(l, NULL, NULL, NULL);
+
+    ListAddLast(l, StringCopy("hello"), &free, &CopyString);
+
+    while (ListCursorHasNext(l))
+    {
+        ListCursorNext(l);
+        printf("1");
+        ListCursorGet(l);
+    }
+
     ListDebugPrintInt(l);
+    ListDebugPrintString(l);
 
     ListFree(l);
 }

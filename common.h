@@ -18,4 +18,9 @@ int *QuickCreateInt(int i);
 */
 void *CopyInt(void *a);
 
+/*
+    Copies an string.
+*/
+void *CopyString(void *a);
+
 #endif /* __CHELPCOMMON__ */
