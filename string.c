@@ -53,3 +53,13 @@ String StringReplace(String src, String replace, String with)
 
     return result;
 }
+
+List StringSplitIntoList(String src, String delims)
+{
+    List result;
+
+    assert(src != NULL);
+    assert(delims != NULL);
+
+    return result;
+}
