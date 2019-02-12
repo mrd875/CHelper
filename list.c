@@ -292,22 +292,20 @@ bool ListNodeChange(ListNode ln, void *data, void (*free_routine)(void *data), v
 }
 
 /*
-    Adds the data to the list at the node. This is NOT for the edges case of insertion but only for inserting when the listnode has prev and next.
+    Adds the data to the list at the node. This is NOT for the edges case of insertion but only for inserting when the listnode has prev.
 */
 bool ListNodeAdd(List l, ListNode ln, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
 {
-    ListNode newNode, prev, next;
+    ListNode newNode, prev;
 
     assert(ln != NULL);
     assert(l != NULL);
-    assert(ln->next != NULL);
     assert(ln->previous != NULL);
 
     if (ListFull(l) == true)
         return false;
 
     prev = ln->previous;
-    next = ln->next;
 
     newNode = ListNodeCreate();
 
@@ -317,8 +315,8 @@ bool ListNodeAdd(List l, ListNode ln, void *data, void (*free_routine)(void *dat
     prev->next = newNode;
     newNode->previous = prev;
 
-    newNode->next = next;
-    next->previous = newNode;
+    newNode->next = ln;
+    ln->previous = newNode;
 
     l->size++;
     ListCursorUpdate(l);
@@ -939,10 +937,10 @@ bool ListCursorAdd(List l, void *data, void (*free_routine)(void *data), void *(
 {
     assert(l != NULL);
 
-    if (l->cursor.current == l->head)
+    if (l->cursor.previous == NULL)
         return ListAddFirst(l, data, free_routine, copy_routine);
 
-    if (l->cursor.current == l->tail)
+    if (l->cursor.previous == l->tail)
         return ListAddLast(l, data, free_routine, copy_routine);
 
     return ListNodeAdd(l, l->cursor.current, data, free_routine, copy_routine);
