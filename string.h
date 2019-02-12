@@ -19,6 +19,11 @@ typedef char *String;
 String StringCopy(String src);
 
 /*
+    Concats the two strings together and returns it. Free afterwards.
+*/
+String StringConcat(String src, String src2);
+
+/*
     Returns a sub string of s. Make sure to free it after.
 */
 String StringGetSubString(String src, int i, int size);

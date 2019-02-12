@@ -9,7 +9,7 @@
 typedef struct List *List;
 
 /*
-    Returns a newly created list. For unlimited size, set to -1.
+    Returns a newly created list. For unlimited size, set to -1. Be sure to free the list after.
 */
 List ListCreate(int size);
 
@@ -112,6 +112,11 @@ bool ListConcat(List l, List l2);
     Copies the List and returns it.
 */
 List ListCopy(List l);
+
+/*
+    Returns a sub list of l. All elements are copied! Be sure to free afterwards.
+*/
+List ListGetSubList(List l, int i, int size);
 
 /*
     Does the function on every element of the List.

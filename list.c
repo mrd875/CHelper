@@ -670,6 +670,7 @@ bool ListConcat(List the_List, List two_List)
 
     two_List->head = NULL;
     ListClear(two_List);
+    ListCursorClear(the_List);
 
     if (two_head == NULL)
         return true;
@@ -702,6 +703,31 @@ List ListCopy(List l)
     {
         data = ListNodeCopyData(ln);
 
+        ListAddLast(result, data, ln->free_routine, ln->copy_routine);
+    }
+
+    return result;
+}
+
+List ListGetSubList(List l, int i, int size)
+{
+    List result;
+    ListNode ln;
+    int x;
+    void *data;
+
+    assert(l != NULL);
+    assert(i >= 0);
+    assert(i < ListSize(l));
+
+    result = ListCreate(-1);
+
+    for (x = 0, ln = l->head; x < i && ln != NULL; x++, ln = ln->next)
+        ;
+
+    for (x = 0; x < size && ln != NULL; x++, ln = ln->next)
+    {
+        data = ListNodeCopyData(ln);
         ListAddLast(result, data, ln->free_routine, ln->copy_routine);
     }
 

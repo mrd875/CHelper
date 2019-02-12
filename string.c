@@ -23,6 +23,23 @@ String StringCopy(String src)
     return result;
 }
 
+String StringConcat(String src, String src2)
+{
+    String result;
+
+    assert(src != NULL);
+    assert(src2 != NULL);
+
+    debugp("Concatting strings");
+    result = calloc(sizeof(char), strlen(src) + strlen(src2) + 1);
+    assert(result != NULL);
+
+    strcpy(result, src);
+    strcat(result, src2);
+
+    return result;
+}
+
 String StringGetSubString(String src, int i, int size)
 {
     String result;

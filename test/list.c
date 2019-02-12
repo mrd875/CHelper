@@ -8,7 +8,7 @@
 int main(void)
 {
     int i;
-    List l;
+    List l, l2;
 
     l = ListCreate(-1);
 
@@ -45,5 +45,13 @@ int main(void)
     ListDebugPrintInt(l);
     ListDebugPrintString(l);
 
+    l2 = ListGetSubList(l, 1, 3);
+    ListDebugPrintInt(l2);
+
+    ListChangeX(l2, QuickCreateInt(1000), &free, &CopyInt, 2);
+    ListDebugPrintInt(l);
+    ListDebugPrintInt(l2);
+
     ListFree(l);
+    ListFree(l2);
 }
