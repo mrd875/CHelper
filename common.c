@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "internal/common.h"
+#include "string.h"
 
 void PrintError(String calledFrom)
 {
@@ -26,4 +27,13 @@ int *QuickCreateInt(int i)
     *result = i;
 
     return result;
+}
+
+void *CopyInt(void *a)
+{
+    int i;
+
+    i = *((int *)a);
+
+    return (void *)QuickCreateInt(i);
 }

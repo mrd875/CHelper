@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "list.h"
 #include "common.h"
@@ -54,6 +55,62 @@ struct List
         ListNode previous;
     } cursor;
 };
+
+/*
+    Updates the cursor.
+*/
+void ListCursorUpdate(List l)
+{
+    assert(l != NULL);
+
+    if (l->cursor.current == NULL && l->cursor.previous == NULL)
+        return; /* At before the head. No need to update */
+
+    if (l->cursor.previous != NULL && l->cursor.current == NULL)
+    {
+        l->cursor.previous = l->tail;
+        return; /* At after the tail*/
+    }
+
+    if (l->cursor.current != NULL)
+    {
+        l->cursor.previous = l->cursor.current->previous;
+        return;
+    }
+}
+
+/*
+    Clears the list iter
+*/
+void ListCursorClear(List l)
+{
+    assert(l != NULL);
+
+    l->cursor.previous = NULL;
+    l->cursor.current = NULL;
+}
+
+/*
+    Sets the cursor.
+*/
+void ListCursorSetTo(List l, ListNode ln)
+{
+    assert(l != NULL);
+
+    l->cursor.current = ln;
+
+    if (ln != NULL)
+    {
+        l->cursor.previous = ln->previous;
+        return;
+    }
+
+    if (l->cursor.previous != NULL)
+    {
+        l->cursor.previous = l->tail;
+        return;
+    }
+}
 
 /*
     Creates a list node for the list.
@@ -436,7 +493,7 @@ bool ListChangeX(List l, void *data, void (*free_routine)(void *data), void *(*c
 */
 bool ListNodeDelete(List l, ListNode ln)
 {
-    ListNode newNode, prev, next;
+    ListNode prev, next;
 
     assert(ln != NULL);
     assert(ln->next != NULL);
@@ -734,62 +791,6 @@ void ListDebugPrintInt(List l)
     }
 
     printf("]\n");
-}
-
-/*
-    Updates the cursor.
-*/
-void ListCursorUpdate(List l)
-{
-    assert(l != NULL);
-
-    if (l->cursor.current == NULL && l->cursor.previous == NULL)
-        return; /* At before the head. No need to update */
-
-    if (l->cursor.previous != NULL && l->cursor.current == NULL)
-    {
-        l->cursor.previous = l->tail;
-        return; /* At after the tail*/
-    }
-
-    if (l->cursor.current != NULL)
-    {
-        l->cursor.previous = l->cursor.current->previous;
-        return;
-    }
-}
-
-/*
-    Clears the list iter
-*/
-void ListCursorClear(List l)
-{
-    assert(l != NULL);
-
-    l->cursor.previous = NULL;
-    l->cursor.current = NULL;
-}
-
-/*
-    Sets the cursor.
-*/
-void ListCursorSetTo(List l, ListNode ln)
-{
-    assert(l != NULL);
-
-    l->cursor.current = ln;
-
-    if (ln != NULL)
-    {
-        l->cursor.previous = ln->previous;
-        return;
-    }
-
-    if (l->cursor.previous != NULL)
-    {
-        l->cursor.previous = l->tail;
-        return;
-    }
 }
 
 bool ListCursorNext(List l)

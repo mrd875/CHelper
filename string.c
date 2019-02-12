@@ -6,6 +6,7 @@
 #include "string.h"
 #include "common.h"
 #include "internal/common.h"
+#include "list.h"
 
 String StringCopy(String src)
 {

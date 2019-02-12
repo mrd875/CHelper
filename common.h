@@ -13,4 +13,9 @@ void PrintError(String calledFrom);
 */
 int *QuickCreateInt(int i);
 
+/*
+    Copies an int.
+*/
+void *CopyInt(void *a);
+
 #endif /* __CHELPCOMMON__ */
