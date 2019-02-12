@@ -20,9 +20,6 @@ struct ListNode
     /* The node that is after this one. */
     ListNode next;
 
-    /* The list that this node belongs to */
-    List owner;
-
     /* The address to the data. */
     void *data;
 
@@ -47,30 +44,23 @@ struct List
     /* The cap of the list */
     int capacity;
 
-    /* The address to the data. */
-    ListNode cur;
-};
+    /* The cursor. */
+    struct
+    {
+        /* The node that this iterator points to */
+        ListNode current;
 
-struct ListIterator
-{
-    /* The node that this iterator points to */
-    ListNode cur;
-
-    /* The node that is next */
-    ListNode next;
-
-    /* The node that is prev */
-    ListNode previous;
+        /* The node that is next */
+        ListNode previous;
+    } cursor;
 };
 
 /*
     Creates a list node for the list.
 */
-ListNode ListNodeCreate(List l)
+ListNode ListNodeCreate()
 {
     ListNode ln;
-
-    assert(l != NULL);
 
     debugp("Creating a list node");
 
@@ -82,7 +72,6 @@ ListNode ListNodeCreate(List l)
     ln->data = NULL;
     ln->next = NULL;
     ln->previous = NULL;
-    ln->owner = l;
 
     return ln;
 }
@@ -142,7 +131,7 @@ List ListCreate(int size)
     l->size = 0;
     l->tail = NULL;
     l->head = NULL;
-    l->cur = NULL;
+    ListCursorClear(l);
 
     return l;
 }
@@ -176,7 +165,7 @@ void ListClear(List l)
         ln = next;
     }
 
-    l->cur = NULL;
+    ListCursorClear(l);
     l->size = 0;
     l->head = NULL;
     l->tail = NULL;
@@ -231,99 +220,6 @@ bool ListEmpty(List l)
     return true;
 }
 
-/*
-    Updates the iterator to be the node.
-*/
-void ListIteratorUpdate(ListIterator li, ListNode ln)
-{
-    assert(ln != NULL);
-    assert(li != NULL);
-
-    li->cur = ln;
-    li->next = ln->next;
-    li->previous = ln->previous;
-}
-
-/*
-    Creates an iterator from a node.
-*/
-ListIterator ListIteratorCreate()
-{
-    ListIterator li;
-
-    debugp("Creating list iterator");
-
-    li = malloc(sizeof(struct ListIterator));
-    assert(li != NULL);
-
-    li->cur = NULL;
-    li->next = NULL;
-    li->previous = NULL;
-
-    return li;
-}
-
-ListIterator ListGetCursorListIterator(List l)
-{
-    ListIterator li;
-    ListNode ln;
-
-    assert(l != NULL);
-
-    debugp("Getting cursor list");
-
-    ln = l->cur;
-
-    if (ln == NULL)
-        return NULL;
-
-    li = ListIteratorCreate(ln);
-
-    return li;
-}
-
-ListIterator ListGetHeadListIterator(List l)
-{
-    ListIterator li;
-    ListNode ln;
-
-    assert(l != NULL);
-
-    debugp("Getting head list");
-
-    ln = l->head;
-
-    if (ln == NULL)
-        return NULL;
-
-    li = ListIteratorCreate();
-
-    li->next = ln;
-
-    return li;
-}
-
-ListIterator ListGetTailListIterator(List l)
-{
-    ListIterator li;
-    ListNode ln;
-
-    assert(l != NULL);
-
-    debugp("Getting head list");
-
-    ln = l->tail;
-
-    if (ln == NULL)
-        return NULL;
-
-    li = ListIteratorCreate();
-
-    li->previous = ln;
-
-    return li;
-}
-
 void *ListGetFirst(List l)
 {
     ListNode ln;
@@ -333,8 +229,6 @@ void *ListGetFirst(List l)
     debugp("Getting head list data");
 
     ln = l->head;
-
-    l->cur = ln;
 
     if (ln == NULL)
         return NULL;
@@ -351,8 +245,6 @@ void *ListGetLast(List l)
     debugp("Getting tail list data");
 
     ln = l->tail;
-
-    l->cur = ln;
 
     if (ln == NULL)
         return NULL;
@@ -375,8 +267,6 @@ void *ListGetX(List l, int x)
     {
         ln = ln->next;
     }
-
-    l->cur = ln;
 
     if (ln == NULL)
         return NULL;
@@ -404,24 +294,22 @@ bool ListNodeChange(ListNode ln, void *data, void (*free_routine)(void *data), v
 /*
     Adds the data to the list at the node. This is NOT for the edges case of insertion but only for inserting when the listnode has prev and next.
 */
-bool ListNodeAdd(ListNode ln, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListNodeAdd(List l, ListNode ln, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
 {
     ListNode newNode, prev, next;
-    List owner;
 
     assert(ln != NULL);
+    assert(l != NULL);
     assert(ln->next != NULL);
     assert(ln->previous != NULL);
 
-    owner = ln->owner;
-
-    if (ListFull(owner) == true)
+    if (ListFull(l) == true)
         return false;
 
     prev = ln->previous;
     next = ln->next;
 
-    newNode = ListNodeCreate(owner);
+    newNode = ListNodeCreate();
 
     if (ListNodeChange(newNode, data, free_routine, copy_routine) == false)
         return false;
@@ -432,8 +320,8 @@ bool ListNodeAdd(ListNode ln, void *data, void (*free_routine)(void *data), void
     newNode->next = next;
     next->previous = newNode;
 
-    owner->size++;
-    owner->cur = newNode;
+    l->size++;
+    ListCursorUpdate(l);
 
     return true;
 }
@@ -463,7 +351,7 @@ bool ListAddFirst(List l, void *data, void (*free_routine)(void *data), void *(*
         head->previous = newNode;
 
     l->size++;
-    l->cur = newNode;
+    ListCursorUpdate(l);
 
     return true;
 }
@@ -493,7 +381,7 @@ bool ListAddLast(List l, void *data, void (*free_routine)(void *data), void *(*c
         tail->next = newNode;
 
     l->size++;
-    l->cur = newNode;
+    ListCursorUpdate(l);
 
     return true;
 }
@@ -523,7 +411,7 @@ bool ListAddX(List l, void *data, void (*free_routine)(void *data), void *(*copy
     }
 
     assert(ln != NULL);
-    return ListNodeAdd(ln, data, free_routine, copy_routine);
+    return ListNodeAdd(l, ln, data, free_routine, copy_routine);
 }
 
 bool ListChangeX(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data), int x)
@@ -548,29 +436,30 @@ bool ListChangeX(List l, void *data, void (*free_routine)(void *data), void *(*c
 /*
     Deletes the node. This is not for edges cases but when the node has a next and prev.
 */
-bool ListNodeDelete(ListNode ln)
+bool ListNodeDelete(List l, ListNode ln)
 {
     ListNode newNode, prev, next;
-    List owner;
 
     assert(ln != NULL);
     assert(ln->next != NULL);
     assert(ln->previous != NULL);
 
-    owner = ln->owner;
-
-    assert(ListEmpty(owner) == false);
+    assert(ListEmpty(l) == false);
 
     prev = ln->previous;
     next = ln->next;
 
-    ListNodeFree(ln);
-
     prev->next = next;
     next->previous = prev;
 
-    owner->size--;
-    owner->cur = next;
+    l->size--;
+
+    if (ln == l->cursor.current)
+        ListCursorSetTo(l, next);
+    else
+        ListCursorUpdate(l);
+
+    ListNodeFree(ln);
 
     return true;
 }
@@ -599,8 +488,12 @@ bool ListDeleteFirst(List l)
     else
         next->previous = NULL;
 
-    l->cur = next;
     l->size--;
+
+    if (head == l->cursor.current)
+        ListCursorSetTo(l, next);
+    else
+        ListCursorUpdate(l);
 
     return true;
 }
@@ -629,8 +522,12 @@ bool ListDeleteLast(List l)
     else
         prev->next = NULL;
 
-    l->cur = prev;
     l->size--;
+
+    if (tail == l->cursor.current)
+        ListCursorSetTo(l, NULL);
+    else
+        ListCursorUpdate(l);
 
     return true;
 }
@@ -660,7 +557,7 @@ bool ListDeleteX(List l, int x)
     }
 
     assert(ln != NULL);
-    return ListNodeDelete(ln);
+    return ListNodeDelete(l, ln);
 }
 
 int ListSearch(List l, bool (*comparator)(void *, void *), void *comparisonArg)
@@ -671,14 +568,11 @@ int ListSearch(List l, bool (*comparator)(void *, void *), void *comparisonArg)
     assert(l != NULL);
     assert(comparator != NULL);
 
-    l->cur = NULL;
-
     for (ln = l->head, i = 0; ln != NULL; ln = ln->next, i++)
     {
         if ((*comparator)(ln->data, comparisonArg) == false)
             continue;
 
-        l->cur = ln;
         return i;
     }
 
@@ -844,107 +738,226 @@ void ListDebugPrintInt(List l)
     printf("]\n");
 }
 
-void ListIteratorFree(ListIterator li)
+/*
+    Updates the cursor.
+*/
+void ListCursorUpdate(List l)
 {
-    assert(li != NULL);
+    assert(l != NULL);
 
-    free(li);
+    if (l->cursor.current == NULL && l->cursor.previous == NULL)
+        return; /* At before the head. No need to update */
+
+    if (l->cursor.previous != NULL && l->cursor.current == NULL)
+    {
+        l->cursor.previous = l->tail;
+        return; /* At after the tail*/
+    }
+
+    if (l->cursor.current != NULL)
+    {
+        l->cursor.previous = l->cursor.current->previous;
+        return;
+    }
 }
 
-bool ListIteratorNext(ListIterator li)
+/*
+    Clears the list iter
+*/
+void ListCursorClear(List l)
 {
-    assert(li != NULL);
+    assert(l != NULL);
 
-    if (li->cur == NULL && li->next == NULL)
-        return false;
+    l->cursor.previous = NULL;
+    l->cursor.current = NULL;
+}
 
-    if (li->cur != NULL && li->cur->next)
+/*
+    Sets the cursor.
+*/
+void ListCursorSetTo(List l, ListNode ln)
+{
+    assert(l != NULL);
+
+    l->cursor.current = ln;
+
+    if (ln != NULL)
     {
-        ListIteratorUpdate(li, li->cur->next);
+        l->cursor.previous = ln->previous;
+        return;
+    }
+
+    if (l->cursor.previous != NULL)
+    {
+        l->cursor.previous = l->tail;
+        return;
+    }
+}
+
+bool ListCursorNext(List l)
+{
+    assert(l != NULL);
+
+    if (l->cursor.current == NULL)
+    {
+        if (l->cursor.previous != NULL)
+            return false;
+
+        ListCursorSetTo(l, l->head);
         return true;
     }
 
-    if (li->next != NULL)
-    {
-        ListIteratorUpdate(li, li->next);
-        return true;
-    }
-
-    li->previous = li->cur;
-    li->cur = NULL;
+    ListCursorSetTo(l, l->cursor.current->next);
     return true;
 }
 
-bool ListIteratorPrevious(ListIterator li)
+bool ListCursorPrevious(List l)
 {
-    assert(li != NULL);
+    assert(l != NULL);
 
-    if (li->cur == NULL && li->previous == NULL)
-        return false;
-
-    if (li->cur != NULL && li->cur->previous != NULL)
+    if (l->cursor.previous == NULL)
     {
-        ListIteratorUpdate(li, li->cur->previous);
+        if (l->cursor.current == NULL)
+            return false;
+
+        ListCursorSetTo(l, NULL);
         return true;
     }
 
-    if (li->previous != NULL)
-    {
-        ListIteratorUpdate(li, li->previous);
-        return true;
-    }
-
-    li->next = li->cur;
-    li->cur = NULL;
+    ListCursorSetTo(l, l->cursor.previous);
     return true;
 }
 
-bool ListIteratorIsNull(ListIterator li)
+bool ListCursorIsNull(List l)
 {
-    if (li != NULL)
+    assert(l != NULL);
+
+    if (l->cursor.current != NULL)
         return false;
 
     return true;
 }
 
-bool ListIteratorSearchNext(ListIterator li, bool (*comparator)(void *, void *), void *comparisonArg)
+bool ListCursorBeforeHead(List l)
 {
-    while ((*comparator)(ListIteratorGet(li), comparisonArg) == false)
-    {
-    }
+    l->cursor.current = NULL;
+    l->cursor.previous = NULL;
+
+    return true;
 }
 
-/*
-    List iterator goes to before element that is true for the search. Returns if it was successful.
-*/
-bool ListIteratorSearchBefore(ListIterator li, bool (*comparator)(void *, void *), void *comparisonArg);
+bool ListCursorAfterTail(List l)
+{
+    l->cursor.current = NULL;
+    l->cursor.previous = l->tail;
 
-/*
-    Returns if the list iterator has next.
-*/
-bool ListIteratorHasNext(ListIterator li);
+    return true;
+}
 
-/*
-    Returns if the list iterator has before.
-*/
-bool ListIteratorHasBefore(ListIterator li);
+bool ListCursorSearchNext(List l, bool (*comparator)(void *, void *), void *comparisonArg)
+{
+    assert(l != NULL);
+    assert(comparator != NULL);
 
-/*
-    Returns the data at the ListIterator.
-*/
-void *ListIteratorGet(ListIterator li);
+    ListCursorNext(l);
+    while (ListCursorIsNull(l) == false && (*comparator)(ListCursorGet(l), comparisonArg) == false)
+    {
+        ListCursorNext(l);
+    }
 
-/*
-    Changes the ListIterator's data. Returns if successful.
-*/
-bool ListIteratorChange(ListIterator li, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
+    if (ListCursorIsNull(l) == false)
+        return false;
 
-/*
-    Adds item to List before the ListIterator. Returns if the list iterator was successful.
-*/
-bool ListIteratorAdd(ListIterator li, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
+    return true;
+}
 
-/*
-    Deletes the entry at ListIterator and goes before. Returns if successful.
-*/
-bool ListIteratorDelete(ListIterator li);
+bool ListCursorSearchBefore(List l, bool (*comparator)(void *, void *), void *comparisonArg)
+{
+    assert(l != NULL);
+    assert(comparator != NULL);
+
+    ListCursorPrevious(l);
+    while (ListCursorIsNull(l) == false && (*comparator)(ListCursorGet(l), comparisonArg) == false)
+    {
+        ListCursorPrevious(l);
+    }
+
+    if (ListCursorIsNull(l) == false)
+        return false;
+
+    return true;
+}
+
+bool ListCursorHasNext(List l)
+{
+    assert(l != NULL);
+
+    if (l->cursor.current == NULL)
+    {
+        if (l->cursor.previous != NULL)
+            return false;
+
+        if (l->head == NULL)
+            return false;
+
+        return true;
+    }
+
+    if (l->cursor.current->next == NULL)
+        return false;
+
+    return true;
+}
+
+bool ListCursorHasPrevious(List l)
+{
+    assert(l != NULL);
+
+    if (l->cursor.previous == NULL)
+        return false;
+
+    return true;
+}
+
+void *ListCursorGet(List l)
+{
+    assert(l != NULL);
+    assert(ListCursorIsNull(l) == false);
+
+    return l->cursor.current->data;
+}
+
+bool ListCursorChange(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+{
+    assert(l != NULL);
+    assert(ListCursorIsNull(l) == false);
+
+    return ListNodeChange(l->cursor.current, data, free_routine, copy_routine);
+}
+
+bool ListCursorAdd(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+{
+    assert(l != NULL);
+
+    if (l->cursor.current == l->head)
+        return ListAddFirst(l, data, free_routine, copy_routine);
+
+    if (l->cursor.current == l->tail)
+        return ListAddLast(l, data, free_routine, copy_routine);
+
+    return ListNodeAdd(l, l->cursor.current, data, free_routine, copy_routine);
+}
+
+bool ListCursorDelete(List l)
+{
+    assert(l != NULL);
+    assert(ListCursorIsNull(l) == false);
+
+    if (l->cursor.current == l->head)
+        return ListDeleteFirst(l);
+
+    if (l->cursor.current == l->tail)
+        return ListDeleteLast(l);
+
+    return ListNodeDelete(l, l->cursor.current);
+}

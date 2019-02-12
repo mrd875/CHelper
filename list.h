@@ -9,11 +9,6 @@
 typedef struct List *List;
 
 /*
-    This is the data type for list iterators.
-*/
-typedef struct ListIterator *ListIterator;
-
-/*
     Returns a newly created list. For unlimited size, set to -1.
 */
 List ListCreate(int size);
@@ -47,21 +42,6 @@ bool ListFull(List l);
     Returns if the list is empty.
 */
 bool ListEmpty(List l);
-
-/*
-    Returns the list iterator at the list's last operation. Be sure to free.
-*/
-ListIterator ListGetCursorListIterator(List l);
-
-/*
-    Returns a List iterator just before the list's head. Be sure to free.
-*/
-ListIterator ListGetHeadListIterator(List l);
-
-/*
-    Returns a List iterator just after the list's tail. Be sure to free.
-*/
-ListIterator ListGetTailListIterator(List l);
 
 /*
     Returns the address of the first element in the List, will return NULL if there isn't one.
@@ -154,63 +134,68 @@ void ListDebugPrintString(List l);
 void ListDebugPrintInt(List l);
 
 /*
-    Frees the list iterator.
+    List cursor goes to just before the head in the list. Returns if successful.
 */
-void ListIteratorFree(ListIterator li);
+bool ListCursorBeforeHead(List l);
+
+/*
+    List cursor goes to just after the tail in the list. Returns if successful.
+*/
+bool ListCursorAfterTail(List l);
+
+/*
+    List cursor goes to next thing in the list. Returns if successful.
+*/
+bool ListCursorNext(List l);
 
 /*
     List iterator goes to next thing in the list. Returns if successful.
 */
-bool ListIteratorNext(ListIterator li);
-
-/*
-    List iterator goes to next thing in the list. Returns if successful.
-*/
-bool ListIteratorPrevious(ListIterator li);
+bool ListCursorPrevious(List l);
 
 /*
     Returns if the iterator is on a null spot of the list (edges).
 */
-bool ListIteratorIsNull(ListIterator li);
+bool ListCursorIsNull(List l);
 
 /*
     List iterator goes to next element that is true for the search. Returns if it was successful.
 */
-bool ListIteratorSearchNext(ListIterator li, bool (*comparator)(void *, void *), void *comparisonArg);
+bool ListCursorSearchNext(List l, bool (*comparator)(void *, void *), void *comparisonArg);
 
 /*
     List iterator goes to before element that is true for the search. Returns if it was successful.
 */
-bool ListIteratorSearchPrevious(ListIterator li, bool (*comparator)(void *, void *), void *comparisonArg);
+bool ListCursorSearchPrevious(List l, bool (*comparator)(void *, void *), void *comparisonArg);
 
 /*
     Returns if the list iterator has next.
 */
-bool ListIteratorHasNext(ListIterator li);
+bool ListCursorHasNext(List l);
 
 /*
     Returns if the list iterator has before.
 */
-bool ListIteratorHasPrevious(ListIterator li);
+bool ListCursorHasPrevious(List l);
 
 /*
-    Returns the data at the ListIterator.
+    Returns the data at the ListCursor.
 */
-void *ListIteratorGet(ListIterator li);
+void *ListCursorGet(List l);
 
 /*
-    Changes the ListIterator's data. Returns if successful.
+    Changes the ListCursor's data. Returns if successful.
 */
-bool ListIteratorChange(ListIterator li, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
+bool ListCursorChange(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
 
 /*
-    Adds item to List before the ListIterator. Returns if the list iterator was successful.
+    Adds item to List before the ListCursor. Returns if the list iterator was successful.
 */
-bool ListIteratorAdd(ListIterator li, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
+bool ListCursorAdd(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data));
 
 /*
-    Deletes the entry at ListIterator and goes before. Returns if successful.
+    Deletes the entry at ListCursor and goes after. Returns if successful.
 */
-bool ListIteratorDelete(ListIterator li);
+bool ListCursorDelete(List l);
 
 #endif /* __CHELPLIST__ */
