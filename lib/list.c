@@ -968,7 +968,7 @@ bool ListCursorSearchNext(List l, bool (*comparator)(void *, void *), void *comp
         ListCursorNext(l);
     }
 
-    if (ListCursorIsNull(l) == false)
+    if (ListCursorIsNull(l) == true)
         return false;
 
     return true;
@@ -985,7 +985,7 @@ bool ListCursorSearchBefore(List l, bool (*comparator)(void *, void *), void *co
         ListCursorPrevious(l);
     }
 
-    if (ListCursorIsNull(l) == false)
+    if (ListCursorIsNull(l) == true)
         return false;
 
     return true;

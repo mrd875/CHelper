@@ -17,6 +17,7 @@ SRC = .
 
 LIBCHELPER = $(LIB)/libCHelper.a
 TESTLIST = $(BIN)/testlist
+TESTDICT = $(BIN)/testdict
 
 
 .phony:	all
@@ -48,7 +49,20 @@ clean-all: clean-binary clean
 	@rm -rf $(BUILD)
 
 testlist: mkdirs $(TESTLIST)
+testdict: mkdirs $(TESTDICT)
 libchelper: mkdirs $(LIBCHELPER)
+
+
+
+$(TESTDICT): $(OBJ)/test/dictionary.o $(LIBCHELPER)
+	@echo "$(CC) $@"
+	@$(CC) -o $@ $(CFLAGS) $^
+	@echo "finished $@"
+	@echo ""
+
+$(OBJ)/test/dictionary.o: $(SRC)/test/dictionary.c $(SRC)/lib/common.h $(SRC)/lib/string.h $(SRC)/lib/dictionary.h
+	@echo "$(CC) $@"
+	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
 
 
