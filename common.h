@@ -7,9 +7,14 @@
 typedef struct List *List;
 
 /*
+    This is the data type for dictionaries.
+*/
+typedef struct Dictionary *Dictionary;
+
+/*
     This struct holds the data args.
 */
-typedef struct ListDataArgs
+typedef struct DataArgs
 {
     /* The function to free the data. */
     void (*free_routine)(void *data);
@@ -19,7 +24,7 @@ typedef struct ListDataArgs
 
     /* Size of the data */
     int size;
-} ListDataArgs;
+} DataArgs;
 
 /*
     String
@@ -34,31 +39,21 @@ void PrintError(String calledFrom);
 /*
     Creates an int. Free afterwards.
 */
-int *QuickCreateInt(int i);
-
-/*
-    Copies an int.
-*/
-void *CopyInt(void *a);
-
-/*
-    Copies an string.
-*/
-void *CopyString(void *a);
+int *IntCopy(int i);
 
 /*
     Null data args
 */
-ListDataArgs ListDataArgsNULL();
+DataArgs DataArgsNULL();
 
 /*
     string data args, make sure to update the size to reflect how big ur string is
 */
-ListDataArgs ListDataArgsString();
+DataArgs DataArgsString();
 
 /*
     int data args
 */
-ListDataArgs ListDataArgsInt();
+DataArgs DataArgsInt();
 
 #endif /* __CHELPCOMMON__ */

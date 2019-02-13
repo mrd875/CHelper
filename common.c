@@ -15,7 +15,7 @@ void PrintError(String calledFrom)
     fprintf(stderr, "%s: %s\n", calledFrom, GetErrorMessage());
 }
 
-int *QuickCreateInt(int i)
+int *IntCopy(int i)
 {
     int *result;
 
@@ -29,23 +29,29 @@ int *QuickCreateInt(int i)
     return result;
 }
 
+/*
+    Copys the int, for list args.
+*/
 void *CopyInt(void *a)
 {
     int i;
 
     i = *((int *)a);
 
-    return (void *)QuickCreateInt(i);
+    return (void *)IntCopy(i);
 }
 
+/*
+    Copys the string, for list args.
+*/
 void *CopyString(void *a)
 {
     return (void *)StringCopy((String)a);
 }
 
-ListDataArgs ListDataArgsNULL()
+DataArgs DataArgsNULL()
 {
-    ListDataArgs a;
+    DataArgs a;
 
     a.size = 0;
     a.free_routine = NULL;
@@ -54,9 +60,9 @@ ListDataArgs ListDataArgsNULL()
     return a;
 }
 
-ListDataArgs ListDataArgsInt()
+DataArgs DataArgsInt()
 {
-    ListDataArgs a;
+    DataArgs a;
 
     a.size = sizeof(int);
     a.free_routine = &free;
@@ -65,9 +71,9 @@ ListDataArgs ListDataArgsInt()
     return a;
 }
 
-ListDataArgs ListDataArgsString()
+DataArgs DataArgsString()
 {
-    ListDataArgs a;
+    DataArgs a;
 
     a.size = sizeof(char); /*Make sure caller updates this...*/
     a.free_routine = &free;

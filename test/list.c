@@ -44,7 +44,7 @@ void AddFirstInt(List l, int i)
     before_size = ListSize(l);
     before_head = ListGetFirst(l);
     wasFull = ListFull(l);
-    new_thing = QuickCreateInt(i);
+    new_thing = IntCopy(i);
 
     int *expect_addrs[before_size + 1];
     int expect_contents[before_size + 1];
@@ -73,7 +73,7 @@ void AddFirstInt(List l, int i)
         should_size++;
 
     printf("\nAdding %d to first: ", i);
-    ListAddFirst(l, new_thing, ListDataArgsInt());
+    ListAddFirst(l, new_thing, DataArgsInt());
 
     new_size = ListSize(l);
 
@@ -164,7 +164,7 @@ int main(void)
     ListDebugPrintString(l);
 
     l2 = ListCopy(l);
-    ListChangeX(l2, StringCopy("giawdawdwad089324723948"), ListDataArgsString(), 5);
+    ListChangeX(l2, StringCopy("giawdawdwad089324723948"), DataArgsString(), 5);
     ListDebugPrintString(l2);
     ListDebugPrintString(l);
 

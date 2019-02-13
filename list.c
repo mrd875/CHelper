@@ -340,7 +340,7 @@ void *ListGetX(List l, int x)
 /*
     Changes the data at the node.
 */
-bool ListNodeChange(ListNode ln, void *data, ListDataArgs dataArgs)
+bool ListNodeChange(ListNode ln, void *data, DataArgs dataArgs)
 {
     assert(ln != NULL);
 
@@ -358,7 +358,7 @@ bool ListNodeChange(ListNode ln, void *data, ListDataArgs dataArgs)
 /*
     Adds the data to the list at the node. This is NOT for the edges case of insertion but only for inserting when the listnode has prev.
 */
-bool ListNodeAdd(List l, ListNode ln, void *data, ListDataArgs dataArgs)
+bool ListNodeAdd(List l, ListNode ln, void *data, DataArgs dataArgs)
 {
     ListNode newNode, prev;
 
@@ -388,7 +388,7 @@ bool ListNodeAdd(List l, ListNode ln, void *data, ListDataArgs dataArgs)
     return true;
 }
 
-bool ListAddFirst(List l, void *data, ListDataArgs dataArgs)
+bool ListAddFirst(List l, void *data, DataArgs dataArgs)
 {
     ListNode head, newNode;
 
@@ -418,7 +418,7 @@ bool ListAddFirst(List l, void *data, ListDataArgs dataArgs)
     return true;
 }
 
-bool ListAddLast(List l, void *data, ListDataArgs dataArgs)
+bool ListAddLast(List l, void *data, DataArgs dataArgs)
 {
     ListNode tail, newNode;
 
@@ -448,7 +448,7 @@ bool ListAddLast(List l, void *data, ListDataArgs dataArgs)
     return true;
 }
 
-bool ListAddX(List l, void *data, ListDataArgs dataArgs, int x)
+bool ListAddX(List l, void *data, DataArgs dataArgs, int x)
 {
     int i;
     ListNode ln;
@@ -476,7 +476,7 @@ bool ListAddX(List l, void *data, ListDataArgs dataArgs, int x)
     return ListNodeAdd(l, ln, data, dataArgs);
 }
 
-bool ListChangeX(List l, void *data, ListDataArgs dataArgs, int x)
+bool ListChangeX(List l, void *data, DataArgs dataArgs, int x)
 {
     int i;
     ListNode ln;
@@ -701,7 +701,7 @@ List ListCopy(List l)
     List result;
     ListNode ln;
     void *data;
-    ListDataArgs dataArgs;
+    DataArgs dataArgs;
 
     assert(l != NULL);
 
@@ -727,7 +727,7 @@ List ListGetSubList(List l, int i, int size)
     ListNode ln;
     int x;
     void *data;
-    ListDataArgs dataArgs;
+    DataArgs dataArgs;
 
     assert(l != NULL);
     assert(i >= 0);
@@ -1030,7 +1030,7 @@ void *ListCursorGet(List l)
     return l->cursor.current->data;
 }
 
-bool ListCursorChange(List l, void *data, ListDataArgs dataArgs)
+bool ListCursorChange(List l, void *data, DataArgs dataArgs)
 {
     assert(l != NULL);
     assert(ListCursorIsNull(l) == false);
@@ -1038,7 +1038,7 @@ bool ListCursorChange(List l, void *data, ListDataArgs dataArgs)
     return ListNodeChange(l->cursor.current, data, dataArgs);
 }
 
-bool ListCursorAdd(List l, void *data, ListDataArgs dataArgs)
+bool ListCursorAdd(List l, void *data, DataArgs dataArgs)
 {
     assert(l != NULL);
 

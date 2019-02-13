@@ -64,7 +64,7 @@ $(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/common.h $(SRC)/list.h $(SRC)/stri
 
 
 
-$(LIBCHELPER): $(OBJ)/internal/common.o $(OBJ)/common.o $(OBJ)/string.o $(OBJ)/list.o
+$(LIBCHELPER): $(OBJ)/internal/common.o $(OBJ)/common.o $(OBJ)/string.o $(OBJ)/list.o $(OBJ)/dictionary.o
 	@echo "ar $@"
 	@ar rcs $@ $^
 	@echo ""
@@ -83,5 +83,9 @@ $(OBJ)/string.o: $(SRC)/string.c $(SRC)/string.h $(SRC)/common.h $(SRC)/internal
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 	
 $(OBJ)/list.o: $(SRC)/list.c $(SRC)/list.h $(SRC)/common.h $(SRC)/internal/common.h
+	@echo "$(CC) $@"
+	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
+
+$(OBJ)/dictionary.o: $(SRC)/dictionary.c $(SRC)/dictionary.h $(SRC)/internal/common.h $(SRC)/common.h $(SRC)/list.h $(SRC)/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<

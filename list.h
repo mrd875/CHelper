@@ -57,22 +57,22 @@ void *ListGetX(List l, int x);
 /*
     Adds the given data to the start of the List, returns if it was successful. free and copy are pointers to functions that know how to free and copy the data.
 */
-bool ListAddFirst(List l, void *data, ListDataArgs dataArgs);
+bool ListAddFirst(List l, void *data, DataArgs dataArgs);
 
 /*
     Adds the given data to the end of the List, returns if it was successful.
 */
-bool ListAddLast(List l, void *data, ListDataArgs dataArgs);
+bool ListAddLast(List l, void *data, DataArgs dataArgs);
 
 /*
     Adds the given data at the x'th spot of the List (pushes everything else after futher down the List), returns if it was successful.
 */
-bool ListAddX(List l, void *data, ListDataArgs dataArgs, int x);
+bool ListAddX(List l, void *data, DataArgs dataArgs, int x);
 
 /*
     Changes the data at the x'th spot in the List, will free the old data. Returns if it was successful.
 */
-bool ListChangeX(List l, void *data, ListDataArgs dataArgs, int x);
+bool ListChangeX(List l, void *data, DataArgs dataArgs, int x);
 
 /*
     Deletes and frees the data found at the end of the List. Returns if successful.
@@ -197,12 +197,12 @@ void *ListCursorGet(List l);
 /*
     Changes the ListCursor's data. Returns if successful.
 */
-bool ListCursorChange(List l, void *data, ListDataArgs dataArgs);
+bool ListCursorChange(List l, void *data, DataArgs dataArgs);
 
 /*
     Adds item to List before the ListCursor. Returns if the list iterator was successful.
 */
-bool ListCursorAdd(List l, void *data, ListDataArgs dataArgs);
+bool ListCursorAdd(List l, void *data, DataArgs dataArgs);
 
 /*
     Deletes the entry at ListCursor and goes after. Returns if successful.
