@@ -30,7 +30,8 @@ mkdirs:
 	@mkdir -p $(BIN)
 	@mkdir -p $(LIB)
 	@mkdir -p $(OBJ)/test
-	@mkdir -p $(OBJ)/internal
+	@mkdir -p $(OBJ)/lib
+	@mkdir -p $(OBJ)/lib/internal
 	@echo ""
 
 clean:
@@ -57,35 +58,35 @@ $(TESTLIST): $(OBJ)/test/list.o $(LIBCHELPER)
 	@echo "finished $@"
 	@echo ""
 
-$(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/common.h $(SRC)/list.h $(SRC)/string.h
+$(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/lib/common.h $(SRC)/lib/list.h $(SRC)/lib/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
 
 
 
-$(LIBCHELPER): $(OBJ)/internal/common.o $(OBJ)/common.o $(OBJ)/string.o $(OBJ)/list.o $(OBJ)/dictionary.o
+$(LIBCHELPER): $(OBJ)/lib/internal/common.o $(OBJ)/lib/common.o $(OBJ)/lib/string.o $(OBJ)/lib/list.o $(OBJ)/lib/dictionary.o
 	@echo "ar $@"
 	@ar rcs $@ $^
 	@echo ""
 
 
-$(OBJ)/internal/common.o: $(SRC)/internal/common.c $(SRC)/internal/common.h $(SRC)/string.h
+$(OBJ)/lib/internal/common.o: $(SRC)/lib/internal/common.c $(SRC)/lib/internal/common.h $(SRC)/lib/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
-$(OBJ)/common.o: $(SRC)/common.c $(SRC)/common.h $(SRC)/internal/common.h $(SRC)/string.h
+$(OBJ)/lib/common.o: $(SRC)/lib/common.c $(SRC)/lib/common.h $(SRC)/lib/internal/common.h $(SRC)/lib/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
-$(OBJ)/string.o: $(SRC)/string.c $(SRC)/string.h $(SRC)/common.h $(SRC)/internal/common.h $(SRC)/list.h
+$(OBJ)/lib/string.o: $(SRC)/lib/string.c $(SRC)/lib/string.h $(SRC)/lib/common.h $(SRC)/lib/internal/common.h $(SRC)/lib/list.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 	
-$(OBJ)/list.o: $(SRC)/list.c $(SRC)/list.h $(SRC)/common.h $(SRC)/internal/common.h
+$(OBJ)/lib/list.o: $(SRC)/lib/list.c $(SRC)/lib/list.h $(SRC)/lib/common.h $(SRC)/lib/internal/common.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
-$(OBJ)/dictionary.o: $(SRC)/dictionary.c $(SRC)/dictionary.h $(SRC)/internal/common.h $(SRC)/common.h $(SRC)/list.h $(SRC)/string.h
+$(OBJ)/lib/dictionary.o: $(SRC)/lib/dictionary.c $(SRC)/lib/dictionary.h $(SRC)/lib/internal/common.h $(SRC)/lib/common.h $(SRC)/lib/list.h $(SRC)/lib/string.h
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<

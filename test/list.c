@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "../common.h"
-#include "../list.h"
-#include "../string.h"
+#include "../lib/common.h"
+#include "../lib/list.h"
+#include "../lib/string.h"
 
 int CountCursorFromHead(List l)
 {
