@@ -1,106 +1,147 @@
+# Targets to make by default
+TARGETS = $(LIBCHELPER)
+
+# Flags
 CC = gcc
 CFLAGS = -g #-D __CHELPDEBUG__
 CPPFLAGS = -std=gnu99 -Wall -Wextra -pedantic
 
-TARGETS = $(LIBCHELPER)
+
+# Setup dirs
+BUILD_DIR = build
+SRC_DIR = src
+BIN_DIR = $(BUILD_DIR)/bin
+LIB_DIR = $(BUILD_DIR)/lib
+OBJ_DIR = $(BUILD_DIR)/obj
 
 
-PLATFORM = $(shell uname -s)
-ARCH = $(shell uname -m)
+# setup target names
+LIBCHELPER = $(LIB_DIR)/libCHelper.a
 
-BUILD = ./build/$(PLATFORM)$(ARCH)
+TESTLIST = $(BIN_DIR)/testlist
+TESTDICT = $(BIN_DIR)/testdict
+TESTSTRING = $(BIN_DIR)/teststring
+TESTSTRINGBUILDER = $(BIN_DIR)/teststringbuilder
 
-OBJ = $(BUILD)/obj
-BIN = $(BUILD)/bin
-LIB = $(BUILD)/lib
-SRC = .
-
-LIBCHELPER = $(LIB)/libCHelper.a
-TESTLIST = $(BIN)/testlist
-TESTDICT = $(BIN)/testdict
+TESTS = $(TESTLIST) $(TESTDICT) $(TESTSTRING) $(TESTSTRINGBUILDER)
 
 
-.phony:	all
-
+# default rule and all
 all: mkdirs $(TARGETS)
 
+
+tests: mkdirs $(TESTS)
+
+
+# some target rules
+libchelper: mkdirs $(LIBCHELPER)
+
+testlist: mkdirs $(TESTLIST)
+	@echo "Running test list"
+	@echo ""
+	@$(TESTLIST)
+
+testdict: mkdirs $(TESTDICT)
+	@echo "Running test list"
+	@echo ""
+	@$(TESTDICT)
+
+teststring: mkdirs $(TESTSTRING)
+	@echo "Running test list"
+	@echo ""
+	@$(TESTSTRING)
+
+teststringbuilder: mkdirs $(TESTSTRINGBUILDER)
+	@echo "Running test list"
+	@echo ""
+	@$(TESTSTRINGBUILDER)
+
+
+# mkdirs and clean rules
 mkdirs:
 	@echo "making dirs"
-	@mkdir -p $(BUILD)
-	@mkdir -p $(OBJ)
-	@mkdir -p $(BIN)
-	@mkdir -p $(LIB)
-	@mkdir -p $(OBJ)/test
-	@mkdir -p $(OBJ)/lib
-	@mkdir -p $(OBJ)/lib/internal
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(LIB_DIR)
 	@echo ""
 
 clean:
 	@echo "cleaning intermediate files"
-	@rm -rf $(OBJ)
+	@rm -rf $(OBJ_DIR)
 
 clean-binary:
 	@echo "cleaning binaries"
 	@rm -rf $(TARGETS)
-	@rm -rf $(BIN) $(LIB)
+	@rm -rf $(BIN_DIR) $(LIB_DIR)
 
 clean-all: clean-binary clean
 	@echo "cleaning all"
-	@rm -rf $(BUILD)
-
-testlist: mkdirs $(TESTLIST)
-testdict: mkdirs $(TESTDICT)
-libchelper: mkdirs $(LIBCHELPER)
+	@rm -rf $(BUILD_DIR)
 
 
+# src dirs
+CHELPER_DIR = $(SRC_DIR)/chelper
+CHELPER_INTERNAL_DIR = $(CHELPER_DIR)/internal
 
-$(TESTDICT): $(OBJ)/test/dictionary.o $(LIBCHELPER)
+TEST_DIR = $(SRC_DIR)/test
+
+
+# src lists
+CHELPER_SOURCES = $(wildcard $(CHELPER_DIR)/*.c)
+CHELPER_INTERNAL_SOURCES = $(wildcard $(CHELPER_INTERNAL_DIR)/*.c)
+
+TEST_SOURCES = $(wildcard $(TEST_DIR)/*.c)
+
+
+# obj lists
+CHELPER_OBJS = $(patsubst $(CHELPER_DIR)/%.c, $(OBJ_DIR)/chelper_%.o, $(CHELPER_SOURCES))
+CHELPER_INTERNAL_OBJS = $(patsubst $(CHELPER_INTERNAL_DIR)/%.c, $(OBJ_DIR)/chelper_internal_%.o, $(CHELPER_INTERNAL_SOURCES))
+
+
+TEST_OBJS = $(patsubst $(TEST_DIR)/%.c, $(OBJ_DIR)/test_%.o, $(TEST_SOURCES))
+
+
+
+# rules to build objects
+$(OBJ_DIR)/chelper_%.o: $(CHELPER_DIR)/%.c
 	@echo "$(CC) $@"
-	@$(CC) -o $@ $(CFLAGS) $^
-	@echo "finished $@"
-	@echo ""
+	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
-$(OBJ)/test/dictionary.o: $(SRC)/test/dictionary.c $(SRC)/lib/common.h $(SRC)/lib/string.h $(SRC)/lib/dictionary.h
+$(OBJ_DIR)/chelper_internal_%.o: $(CHELPER_INTERNAL_DIR)/%.c
+	@echo "$(CC) $@"
+	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
+
+$(OBJ_DIR)/test_%.o: $(TEST_DIR)/%.c
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
 
-
-$(TESTLIST): $(OBJ)/test/list.o $(LIBCHELPER)
-	@echo "$(CC) $@"
-	@$(CC) -o $@ $(CFLAGS) $^
-	@echo "finished $@"
-	@echo ""
-
-$(OBJ)/test/list.o: $(SRC)/test/list.c $(SRC)/lib/common.h $(SRC)/lib/list.h $(SRC)/lib/string.h
-	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
-
-
-
-
-$(LIBCHELPER): $(OBJ)/lib/internal/common.o $(OBJ)/lib/common.o $(OBJ)/lib/string.o $(OBJ)/lib/list.o $(OBJ)/lib/dictionary.o
+# linking rules
+$(LIBCHELPER): $(CHELPER_OBJS) $(CHELPER_INTERNAL_OBJS)
 	@echo "ar $@"
 	@ar rcs $@ $^
 	@echo ""
 
+$(TESTDICT): $(OBJ_DIR)/test_dictionary.o $(LIBCHELPER)
+	@echo "$(CC) $@"
+	@$(CC) -o $@ $(CFLAGS) $^
+	@echo "finished $@"
+	@echo ""
 
-$(OBJ)/lib/internal/common.o: $(SRC)/lib/internal/common.c $(SRC)/lib/internal/common.h $(SRC)/lib/string.h
+$(TESTLIST): $(OBJ_DIR)/test_list.o $(LIBCHELPER)
 	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
+	@$(CC) -o $@ $(CFLAGS) $^
+	@echo "finished $@"
+	@echo ""
 
-$(OBJ)/lib/common.o: $(SRC)/lib/common.c $(SRC)/lib/common.h $(SRC)/lib/internal/common.h $(SRC)/lib/string.h
+$(TESTSTRING): $(OBJ_DIR)/test_string.o $(LIBCHELPER)
 	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
+	@$(CC) -o $@ $(CFLAGS) $^
+	@echo "finished $@"
+	@echo ""
 
-$(OBJ)/lib/string.o: $(SRC)/lib/string.c $(SRC)/lib/string.h $(SRC)/lib/common.h $(SRC)/lib/internal/common.h $(SRC)/lib/list.h
+$(TESTSTRINGBUILDER): $(OBJ_DIR)/test_stringbuilder.o $(LIBCHELPER)
 	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
-	
-$(OBJ)/lib/list.o: $(SRC)/lib/list.c $(SRC)/lib/list.h $(SRC)/lib/common.h $(SRC)/lib/internal/common.h
-	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
-
-$(OBJ)/lib/dictionary.o: $(SRC)/lib/dictionary.c $(SRC)/lib/dictionary.h $(SRC)/lib/internal/common.h $(SRC)/lib/common.h $(SRC)/lib/list.h $(SRC)/lib/string.h
-	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
+	@$(CC) -o $@ $(CFLAGS) $^
+	@echo "finished $@"
+	@echo ""

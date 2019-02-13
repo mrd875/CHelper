@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "../lib/common.h"
-#include "../lib/list.h"
-#include "../lib/string.h"
+#include "../chelper/common.h"
+#include "../chelper/list.h"
+#include "../chelper/string.h"
 
 int CountCursorFromHead(List l)
 {
