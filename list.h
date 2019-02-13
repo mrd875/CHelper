@@ -2,11 +2,7 @@
 #define __CHELPLIST__
 
 #include <stdbool.h>
-
-/*
-    This is the data type for lists.
-*/
-typedef struct List *List;
+#include "common.h"
 
 /*
     Returns a newly created list. For unlimited size, set to -1. Be sure to free the list after.
@@ -127,6 +123,16 @@ void ListForEach(List l, void (*func)(void *, int i));
     Filters the List.
 */
 void ListFilter(List l, bool (*comparator)(void *, void *), void *comparisonArg);
+
+/*
+    Returns a string of all elements as an int. Free the string afterwards.
+*/
+String ListGetStringInt(List l);
+
+/*
+    Returns a string of all elements as an String. Free the string afterwards.
+*/
+String ListGetStringString(List l);
 
 /*
     For debugging purposes: Prints everyelement as a string.

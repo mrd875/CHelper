@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
 #include "string.h"
 #include "common.h"
@@ -61,15 +63,83 @@ String StringGetSubString(String src, int i, int size)
     return result;
 }
 
+int StringFind(String src, String what)
+{
+    String found;
+
+    assert(src != NULL);
+    assert(what != NULL);
+
+    found = strstr(src, what);
+
+    if (found == NULL)
+        return -1;
+
+    return (int)(abs(src - found));
+}
+
+bool StringContains(String src, String what)
+{
+    assert(src != NULL);
+    assert(what != NULL);
+
+    if (StringFind(src, what) == -1)
+        return false;
+
+    return true;
+}
+
+int StringCount(String src, String what)
+{
+    int i, whatlen;
+    String sub;
+
+    assert(src != NULL);
+    assert(what != NULL);
+
+    whatlen = strlen(what);
+    i = 0;
+
+    sub = src;
+    while ((sub = strstr(sub, what)) != NULL)
+    {
+        i++;
+        sub += whatlen;
+    }
+
+    return i;
+}
+
 String StringReplace(String src, String replace, String with)
 {
-    String result;
+    String result, s;
+    int repLen, withLen, i;
 
     assert(src != NULL);
     assert(replace != NULL);
     assert(with != NULL);
 
-    result = StringCopy(src);
+    repLen = strlen(replace);
+    withLen = strlen(with);
+
+    i = StringCount(src, replace);
+
+    result = calloc(sizeof(char), strlen(src) + i * (withLen - repLen) + 1);
+    assert(result != NULL);
+
+    s = src;
+    i = 0;
+    while (*s)
+    {
+        if (strstr(s, replace) == s)
+        {
+            strcpy(&result[i], with);
+            i += withLen;
+            s += repLen;
+        }
+        else
+            result[i++] = *s++;
+    }
 
     return result;
 }
@@ -93,4 +163,32 @@ List StringSplitIntoList(String src, String delims)
 
     free(copy);
     return result;
+}
+
+String StringFormat(String fmt, ...)
+{
+    String result;
+    char buff[MAX_STRING_BUFFER + 1];
+    va_list args;
+    int rc;
+
+    assert(fmt != NULL);
+
+    buff[MAX_STRING_BUFFER] = '\0';
+
+    rc = 0;
+
+    va_start(args, fmt);
+    rc = vsnprintf(buff, MAX_STRING_BUFFER, fmt, args);
+    va_end(args);
+
+    assert(rc >= 0);
+
+    result = StringCopy(buff);
+    return result;
+}
+
+String IntToString(int i)
+{
+    return StringFormat("%d", i);
 }

@@ -3,10 +3,12 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "list.h"
 #include "common.h"
 #include "internal/common.h"
+#include "string.h"
 
 /*
     This is the internal list node structure. Doublely linked.
@@ -761,62 +763,115 @@ void ListFilter(List l, bool (*comparator)(void *, void *), void *comparisonArg)
     }
 }
 
-void ListDebugPrintString(List l)
+String ListGetStringInt(List l)
 {
     ListNode ln;
-    char *i;
-
-    assert(l != NULL);
-
-    ln = l->head;
-
-    printf("[");
-
-    while (ln != NULL)
-    {
-        i = ln->data;
-
-        if (i != NULL)
-            printf("'%s'", i);
-        else
-            printf("NULL");
-
-        ln = ln->next;
-
-        if (ln != NULL)
-            printf(", ");
-    }
-
-    printf("]\n");
-}
-
-void ListDebugPrintInt(List l)
-{
-    ListNode ln;
+    String result, temp, temp2;
     int *i;
 
     assert(l != NULL);
 
+    result = StringCopy("");
+
+    temp = result;
+    result = StringConcat(result, "[");
+    free(temp);
+
     ln = l->head;
-
-    printf("[");
-
     while (ln != NULL)
     {
         i = ln->data;
-
-        if (i != NULL)
-            printf("%d", *i);
-        else
-            printf("NULL");
-
         ln = ln->next;
 
+        temp = result;
+        if (i != NULL)
+        {
+            temp2 = IntToString(*i);
+            result = StringConcat(result, temp2);
+            free(temp2);
+        }
+        else
+            result = StringConcat(result, "NULL");
+
+        free(temp);
+
         if (ln != NULL)
-            printf(", ");
+        {
+            temp = result;
+            result = StringConcat(result, ", ");
+            free(temp);
+        }
     }
 
-    printf("]\n");
+    temp = result;
+    result = StringConcat(result, "]");
+    free(temp);
+
+    return result;
+}
+
+String ListGetStringString(List l)
+{
+    ListNode ln;
+    String i, result, temp;
+
+    assert(l != NULL);
+
+    result = StringCopy("");
+
+    temp = result;
+    result = StringConcat(result, "[");
+    free(temp);
+
+    ln = l->head;
+    while (ln != NULL)
+    {
+        i = ln->data;
+        ln = ln->next;
+
+        temp = result;
+        if (i != NULL)
+            result = StringConcat(result, i);
+        else
+            result = StringConcat(result, "NULL");
+
+        free(temp);
+
+        if (ln != NULL)
+        {
+            temp = result;
+            result = StringConcat(result, ", ");
+            free(temp);
+        }
+    }
+
+    temp = result;
+    result = StringConcat(result, "]");
+    free(temp);
+
+    return result;
+}
+
+void ListDebugPrintString(List l)
+{
+    String s;
+
+    s = ListGetStringString(l);
+
+    printf("%s\n", s);
+
+    free(s);
+}
+
+void ListDebugPrintInt(List l)
+{
+    String s;
+
+    s = ListGetStringInt(l);
+
+    printf("%s\n", s);
+
+    free(s);
 }
 
 bool ListCursorNext(List l)
