@@ -2,25 +2,42 @@
   "version": "2.0.0",
   "tasks": [
     {
-        "label": "build default",
-        "type": "shell",
-        "command": "mingw32-make",
-        "args": [
-            ""
-        ],
-        "group": {
-            "kind": "build",
-            "isDefault": true
-        }
+      "label": "build default",
+      "type": "shell",
+      "command": "mingw32-make",
+      "args": [""],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
-        "label": "build test list",
-        "type": "shell",
-        "command": "mingw32-make",
-        "args": [
-            "testlist"
-        ],
-        "problemMatcher": []
+      "label": "build testlist",
+      "type": "shell",
+      "command": "mingw32-make",
+      "args": ["testlist"],
+      "problemMatcher": []
+    },
+    {
+      "label": "build testdict",
+      "type": "shell",
+      "command": "mingw32-make",
+      "args": ["testdict"],
+      "problemMatcher": []
+    },
+    {
+      "label": "build teststring",
+      "type": "shell",
+      "command": "mingw32-make",
+      "args": ["teststring"],
+      "problemMatcher": []
+    },
+    {
+      "label": "build teststringbuilder",
+      "type": "shell",
+      "command": "mingw32-make",
+      "args": ["teststringbuilder"],
+      "problemMatcher": []
     }
-]
+  ]
 }
