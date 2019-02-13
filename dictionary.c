@@ -227,11 +227,42 @@ bool DictionaryDelete(Dictionary d, String key)
 
 bool DictionarySet(Dictionary d, String key, void *data, DataArgs dataArgs)
 {
+    DictionaryKVP kv;
+
     assert(d != NULL);
     assert(key != NULL);
+
+    DictionaryDelete(d, key);
+
+    kv = DictionaryKVPCreate();
+    kv->key = StringCopy(key);
+    kv->data = data;
+    kv->size = dataArgs.size;
+    kv->free_routine = dataArgs.free_routine;
+    kv->copy_routine = dataArgs.copy_routine;
+
+    ListAddFirst(d->data, kv, DataArgsDictionaryKVP());
+    return true;
 }
 
 List DictionaryKeys(Dictionary d)
 {
+    List l;
+    DictionaryKVP kv;
+
     assert(d != NULL);
+
+    l = ListCreate(-1);
+
+    ListCursorBeforeHead(d->data);
+    while (ListCursorHasNext(d->data) == true)
+    {
+        ListCursorNext(d->data);
+
+        kv = ListCursorGet(d->data);
+
+        ListAddLast(l, StringCopy(kv->key), DataArgsString());
+    }
+
+    return l;
 }
