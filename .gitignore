@@ -1,4 +1,2 @@
 *.core
-*.exe
-*.o
-*.a
+build/

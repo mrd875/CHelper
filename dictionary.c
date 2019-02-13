@@ -183,7 +183,7 @@ int DictionarySize(Dictionary d)
 {
     assert(d != NULL);
 
-    return ListSize(d);
+    return ListSize(d->data);
 }
 
 bool DictionaryHas(Dictionary d, String key)
