@@ -73,7 +73,7 @@ void AddFirstInt(List l, int i)
         should_size++;
 
     printf("\nAdding %d to first: ", i);
-    ListAddFirst(l, new_thing, &free, &CopyInt);
+    ListAddFirst(l, new_thing, ListDataArgsInt());
 
     new_size = ListSize(l);
 
@@ -147,7 +147,7 @@ void AddFirstInt(List l, int i)
 
 int main(void)
 {
-    List l;
+    List l, l2;
 
     l = ListCreate(-1);
 
@@ -160,7 +160,13 @@ int main(void)
 
     printf("\nCOMPLETED TESTS!\n");
 
-    printf("%s", StringReplace("aaaaaaaaaaaaa", "aaaaaaaaaaaa", "b"));
+    l = StringSplitIntoList("hi everyone it is me the guy of the awd aw aw daw daw dawfiowe  90 fe0 9u 09 u09 u 09u 09u 09u 09 j", " ");
+    ListDebugPrintString(l);
+
+    l2 = ListCopy(l);
+    ListChangeX(l2, StringCopy("giawdawdwad089324723948"), ListDataArgsString(), 5);
+    ListDebugPrintString(l2);
+    ListDebugPrintString(l);
 
     return 0;
 }

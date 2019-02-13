@@ -31,6 +31,9 @@ struct ListNode
 
     /* The function to copy the data. */
     void *(*copy_routine)(void *data);
+
+    /* Size of the data */
+    int size;
 };
 
 struct List
@@ -131,6 +134,7 @@ ListNode ListNodeCreate()
     ln->data = NULL;
     ln->next = NULL;
     ln->previous = NULL;
+    ln->size = 0;
 
     return ln;
 }
@@ -336,7 +340,7 @@ void *ListGetX(List l, int x)
 /*
     Changes the data at the node.
 */
-bool ListNodeChange(ListNode ln, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListNodeChange(ListNode ln, void *data, ListDataArgs dataArgs)
 {
     assert(ln != NULL);
 
@@ -344,16 +348,17 @@ bool ListNodeChange(ListNode ln, void *data, void (*free_routine)(void *data), v
         ListNodeFreeData(ln);
 
     ln->data = data;
-    ln->free_routine = free_routine;
-    ln->copy_routine = copy_routine;
 
+    ln->free_routine = dataArgs.free_routine;
+    ln->copy_routine = dataArgs.copy_routine;
+    ln->size = dataArgs.size;
     return true;
 }
 
 /*
     Adds the data to the list at the node. This is NOT for the edges case of insertion but only for inserting when the listnode has prev.
 */
-bool ListNodeAdd(List l, ListNode ln, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListNodeAdd(List l, ListNode ln, void *data, ListDataArgs dataArgs)
 {
     ListNode newNode, prev;
 
@@ -368,7 +373,7 @@ bool ListNodeAdd(List l, ListNode ln, void *data, void (*free_routine)(void *dat
 
     newNode = ListNodeCreate();
 
-    if (ListNodeChange(newNode, data, free_routine, copy_routine) == false)
+    if (ListNodeChange(newNode, data, dataArgs) == false)
         return false;
 
     prev->next = newNode;
@@ -383,7 +388,7 @@ bool ListNodeAdd(List l, ListNode ln, void *data, void (*free_routine)(void *dat
     return true;
 }
 
-bool ListAddFirst(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListAddFirst(List l, void *data, ListDataArgs dataArgs)
 {
     ListNode head, newNode;
 
@@ -394,7 +399,7 @@ bool ListAddFirst(List l, void *data, void (*free_routine)(void *data), void *(*
 
     newNode = ListNodeCreate(l);
 
-    if (ListNodeChange(newNode, data, free_routine, copy_routine) == false)
+    if (ListNodeChange(newNode, data, dataArgs) == false)
         return false;
 
     head = l->head;
@@ -413,7 +418,7 @@ bool ListAddFirst(List l, void *data, void (*free_routine)(void *data), void *(*
     return true;
 }
 
-bool ListAddLast(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListAddLast(List l, void *data, ListDataArgs dataArgs)
 {
     ListNode tail, newNode;
 
@@ -424,7 +429,7 @@ bool ListAddLast(List l, void *data, void (*free_routine)(void *data), void *(*c
 
     newNode = ListNodeCreate(l);
 
-    if (ListNodeChange(newNode, data, free_routine, copy_routine) == false)
+    if (ListNodeChange(newNode, data, dataArgs) == false)
         return false;
 
     tail = l->tail;
@@ -443,7 +448,7 @@ bool ListAddLast(List l, void *data, void (*free_routine)(void *data), void *(*c
     return true;
 }
 
-bool ListAddX(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data), int x)
+bool ListAddX(List l, void *data, ListDataArgs dataArgs, int x)
 {
     int i;
     ListNode ln;
@@ -456,10 +461,10 @@ bool ListAddX(List l, void *data, void (*free_routine)(void *data), void *(*copy
     assert(x <= i);
 
     if (x == 0)
-        return ListAddFirst(l, data, free_routine, copy_routine);
+        return ListAddFirst(l, data, dataArgs);
 
     if (x == i)
-        return ListAddLast(l, data, free_routine, copy_routine);
+        return ListAddLast(l, data, dataArgs);
 
     ln = l->head;
     for (i = 0; i < x && ln != NULL; i++)
@@ -468,10 +473,10 @@ bool ListAddX(List l, void *data, void (*free_routine)(void *data), void *(*copy
     }
 
     assert(ln != NULL);
-    return ListNodeAdd(l, ln, data, free_routine, copy_routine);
+    return ListNodeAdd(l, ln, data, dataArgs);
 }
 
-bool ListChangeX(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data), int x)
+bool ListChangeX(List l, void *data, ListDataArgs dataArgs, int x)
 {
     int i;
     ListNode ln;
@@ -487,7 +492,7 @@ bool ListChangeX(List l, void *data, void (*free_routine)(void *data), void *(*c
     }
 
     assert(ln != NULL);
-    return ListNodeChange(ln, data, free_routine, copy_routine);
+    return ListNodeChange(ln, data, dataArgs);
 }
 
 /*
@@ -696,6 +701,7 @@ List ListCopy(List l)
     List result;
     ListNode ln;
     void *data;
+    ListDataArgs dataArgs;
 
     assert(l != NULL);
 
@@ -705,7 +711,11 @@ List ListCopy(List l)
     {
         data = ListNodeCopyData(ln);
 
-        ListAddLast(result, data, ln->free_routine, ln->copy_routine);
+        dataArgs.size = ln->size;
+        dataArgs.free_routine = ln->free_routine;
+        dataArgs.copy_routine = ln->copy_routine;
+
+        ListAddLast(result, data, dataArgs);
     }
 
     return result;
@@ -717,6 +727,7 @@ List ListGetSubList(List l, int i, int size)
     ListNode ln;
     int x;
     void *data;
+    ListDataArgs dataArgs;
 
     assert(l != NULL);
     assert(i >= 0);
@@ -730,7 +741,11 @@ List ListGetSubList(List l, int i, int size)
     for (x = 0; x < size && ln != NULL; x++, ln = ln->next)
     {
         data = ListNodeCopyData(ln);
-        ListAddLast(result, data, ln->free_routine, ln->copy_routine);
+        dataArgs.copy_routine = ln->copy_routine;
+        dataArgs.free_routine = ln->free_routine;
+        dataArgs.size = ln->size;
+
+        ListAddLast(result, data, dataArgs);
     }
 
     return result;
@@ -830,11 +845,19 @@ String ListGetStringString(List l)
         ln = ln->next;
 
         temp = result;
+        result = StringConcat(result, "\"");
+        free(temp);
+
+        temp = result;
         if (i != NULL)
             result = StringConcat(result, i);
         else
             result = StringConcat(result, "NULL");
 
+        free(temp);
+
+        temp = result;
+        result = StringConcat(result, "\"");
         free(temp);
 
         if (ln != NULL)
@@ -1007,25 +1030,25 @@ void *ListCursorGet(List l)
     return l->cursor.current->data;
 }
 
-bool ListCursorChange(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListCursorChange(List l, void *data, ListDataArgs dataArgs)
 {
     assert(l != NULL);
     assert(ListCursorIsNull(l) == false);
 
-    return ListNodeChange(l->cursor.current, data, free_routine, copy_routine);
+    return ListNodeChange(l->cursor.current, data, dataArgs);
 }
 
-bool ListCursorAdd(List l, void *data, void (*free_routine)(void *data), void *(*copy_routine)(void *data))
+bool ListCursorAdd(List l, void *data, ListDataArgs dataArgs)
 {
     assert(l != NULL);
 
     if (l->cursor.previous == NULL)
-        return ListAddFirst(l, data, free_routine, copy_routine);
+        return ListAddFirst(l, data, dataArgs);
 
     if (l->cursor.previous == l->tail)
-        return ListAddLast(l, data, free_routine, copy_routine);
+        return ListAddLast(l, data, dataArgs);
 
-    return ListNodeAdd(l, l->cursor.current, data, free_routine, copy_routine);
+    return ListNodeAdd(l, l->cursor.current, data, dataArgs);
 }
 
 bool ListCursorDelete(List l)

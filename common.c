@@ -42,3 +42,36 @@ void *CopyString(void *a)
 {
     return (void *)StringCopy((String)a);
 }
+
+ListDataArgs ListDataArgsNULL()
+{
+    ListDataArgs a;
+
+    a.size = 0;
+    a.free_routine = NULL;
+    a.copy_routine = NULL;
+
+    return a;
+}
+
+ListDataArgs ListDataArgsInt()
+{
+    ListDataArgs a;
+
+    a.size = sizeof(int);
+    a.free_routine = &free;
+    a.copy_routine = &CopyInt;
+
+    return a;
+}
+
+ListDataArgs ListDataArgsString()
+{
+    ListDataArgs a;
+
+    a.size = sizeof(char); /*Make sure caller updates this...*/
+    a.free_routine = &free;
+    a.copy_routine = &CopyString;
+
+    return a;
+}

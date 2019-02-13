@@ -148,6 +148,7 @@ List StringSplitIntoList(String src, String delims)
 {
     String token, rest, copy;
     List result;
+    ListDataArgs dataArgs;
 
     assert(src != NULL);
     assert(delims != NULL);
@@ -158,7 +159,10 @@ List StringSplitIntoList(String src, String delims)
     rest = copy;
     while ((token = strtok_r(rest, delims, &rest)) != NULL)
     {
-        ListAddLast(result, StringCopy(token), &free, &CopyString);
+        dataArgs = ListDataArgsString();
+        dataArgs.size = sizeof(char) * (strlen(token) + 1);
+
+        ListAddLast(result, StringCopy(token), dataArgs);
     }
 
     free(copy);
