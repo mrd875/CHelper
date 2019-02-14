@@ -28,36 +28,10 @@ int *IntCopy(int i)
     return result;
 }
 
-/*
-    Copys the int, for list args.
-*/
 void *CopyInt(void *a)
 {
-    int i;
+    if (a == NULL)
+        return NULL;
 
-    i = *((int *)a);
-
-    return (void *)IntCopy(i);
-}
-
-DataArgs DataArgsNULL()
-{
-    DataArgs a;
-
-    a.size = 0;
-    a.free_routine = NULL;
-    a.copy_routine = NULL;
-
-    return a;
-}
-
-DataArgs DataArgsInt()
-{
-    DataArgs a;
-
-    a.size = sizeof(int);
-    a.free_routine = &free;
-    a.copy_routine = &CopyInt;
-
-    return a;
+    return IntCopy(*(int *)a);
 }

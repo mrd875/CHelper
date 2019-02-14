@@ -5,7 +5,9 @@
 #include "arraylist.h"
 #include "common.h"
 #include "internal/common.h"
+#include "string.h"
 
+/*THe minimum size of arrays.*/
 #define ArrayListMinSize 32
 
 /* The array list struct. */
@@ -50,6 +52,7 @@ ArrayList ArrayListCreate(size_t capacity, free_fn_t free_fn, copy_fn_t copy_fn)
     return l;
 }
 
+/*Copies the item in the list.*/
 void *_ArrayListCopyItem(ArrayList l, void *i)
 {
     assert(l != NULL);
@@ -75,11 +78,12 @@ ArrayList ArrayListCopy(ArrayList l)
     l2 = ArrayListCreate(l->capacity, l->free_fn, l->copy_fn);
 
     for (i = 0; i < len; i++)
-        ArrayListAddEnd(l2, _ArrayListCopyItem(l, l->arr[i]));
+        ArrayListAdd(l2, _ArrayListCopyItem(l, l->arr[i]));
 
     return l2;
 }
 
+/*Frees the item in the list.*/
 void _ArrayListFreeItem(ArrayList l, void *i)
 {
     assert(l != NULL);
@@ -116,6 +120,7 @@ void ArrayListFree(ArrayList l)
     free(l);
 }
 
+/*Resizes the array in the list to be the new size.*/
 void _ArrayListResize(ArrayList l, size_t newSize)
 {
     void **arr;
@@ -130,6 +135,7 @@ void _ArrayListResize(ArrayList l, size_t newSize)
     l->size = newSize;
 }
 
+/* Expands the array in the list by double. */
 void _ArrayListExpandArray(ArrayList l)
 {
     assert(l != NULL);
@@ -137,6 +143,7 @@ void _ArrayListExpandArray(ArrayList l)
     _ArrayListResize(l, l->size * 2);
 }
 
+/* Shrinks the array of the list by half. */
 void _ArrayListShrinkArray(ArrayList l)
 {
     assert(l != NULL);
@@ -223,9 +230,8 @@ bool ArrayListAddX(ArrayList l, void *a, size_t x)
         _ArrayListExpandArray(l);
 
     for (i = len; i > x; i--)
-    {
         l->arr[i] = l->arr[i - 1];
-    }
+
     l->arr[x] = a;
 
     l->length++;
@@ -258,9 +264,53 @@ bool ArrayListRemoveX(ArrayList l, size_t x)
     return true;
 }
 
-bool ArrayListAddEnd(ArrayList l, void *a)
+bool ArrayListAdd(ArrayList l, void *a)
 {
     assert(l != NULL);
 
     return ArrayListAddX(l, a, ArrayListLength(l));
+}
+
+String ArrayListToStringInt(ArrayList l)
+{
+    String result, temp;
+    size_t i, len;
+    int *a;
+
+    assert(l != NULL);
+
+    len = ArrayListLength(l);
+
+    result = StringCopy("[");
+
+    for (i = 0; i < len; i++)
+    {
+        a = ArrayListGetX(l, i);
+
+        if (a == NULL)
+            result = StringAdd(result, "NULL");
+        else
+        {
+            temp = IntToString(*a);
+            result = StringAdd(result, temp);
+            free(temp);
+        }
+
+        if (i < len - 1)
+            result = StringAdd(result, ", ");
+    }
+
+    result = StringAdd(result, "]");
+
+    return result;
+}
+
+void ArrayListPrintInt(ArrayList l)
+{
+    String temp;
+
+    temp = ArrayListToStringInt(l);
+    printf("%s\n", temp);
+
+    free(temp);
 }

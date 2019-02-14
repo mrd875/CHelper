@@ -8,7 +8,7 @@
 #include "string.h"
 #include "common.h"
 #include "internal/common.h"
-#include "linkedlist.h"
+#include "arraylist.h"
 
 String StringCopy(String src)
 {
@@ -23,6 +23,14 @@ String StringCopy(String src)
     strcpy(result, src);
 
     return result;
+}
+
+void *CopyString(void *a)
+{
+    if (a == NULL)
+        return NULL;
+
+    return StringCopy(a);
 }
 
 String StringAdd(String src, const String s)
@@ -163,21 +171,21 @@ String StringReplace(String src, String replace, String with)
     return result;
 }
 
-LinkedList StringSplitIntoLinkedList(String src, String delims)
+ArrayList StringSplitIntoArrayList(String src, String delims)
 {
     String token, rest, copy;
-    LinkedList result;
+    ArrayList result;
 
     assert(src != NULL);
     assert(delims != NULL);
 
     copy = StringCopy(src);
-    result = LinkedListCreate(-1);
+    result = ArrayListCreate(0, &free, &CopyString);
 
     rest = copy;
     while ((token = strtok_r(rest, delims, &rest)) != NULL)
     {
-        LinkedListAddLast(result, StringCopy(token), DataArgsString(token));
+        ArrayListAdd(result, StringCopy(token));
     }
 
     free(copy);
@@ -210,27 +218,4 @@ String StringFormat(String fmt, ...)
 String IntToString(int i)
 {
     return StringFormat("%d", i);
-}
-
-/*
-    Copys the string, for LinkedList args.
-*/
-void *CopyString(void *a)
-{
-    return (void *)StringCopy((String)a);
-}
-
-DataArgs DataArgsString(String s)
-{
-    DataArgs a;
-
-    if (s == NULL)
-        a.size = sizeof(char);
-    else
-        a.size = (sizeof(char)) * (strlen(s) + 1);
-
-    a.free_routine = &free;
-    a.copy_routine = &CopyString;
-
-    return a;
 }

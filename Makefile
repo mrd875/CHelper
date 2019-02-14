@@ -1,6 +1,3 @@
-# Targets to make by default
-TARGETS = $(LIBCHELPER)
-
 # Flags
 CC = gcc
 CFLAGS = -g #-D __CHELPDEBUG__
@@ -15,46 +12,16 @@ LIB_DIR = $(BUILD_DIR)/lib
 OBJ_DIR = $(BUILD_DIR)/obj
 
 
-# setup target names
+# Targets to make by default
 LIBCHELPER = $(LIB_DIR)/libCHelper.a
-
-TESTLIST = $(BIN_DIR)/testlist
-TESTDICT = $(BIN_DIR)/testdict
-TESTSTRING = $(BIN_DIR)/teststring
-TESTSTRINGBUILDER = $(BIN_DIR)/teststringbuilder
-
-TESTS = $(TESTLIST) $(TESTDICT) $(TESTSTRING) $(TESTSTRINGBUILDER)
-
+TARGETS = $(LIBCHELPER)
 
 # default rule and all
 all: mkdirs $(TARGETS)
 
 
-tests: mkdirs $(TESTS)
-
-
 # some target rules
 libchelper: mkdirs $(LIBCHELPER)
-
-testlist: mkdirs $(TESTLIST)
-	@echo "Running test list"
-	@echo ""
-	@$(TESTLIST)
-
-testdict: mkdirs $(TESTDICT)
-	@echo "Running test list"
-	@echo ""
-	@$(TESTDICT)
-
-teststring: mkdirs $(TESTSTRING)
-	@echo "Running test list"
-	@echo ""
-	@$(TESTSTRING)
-
-teststringbuilder: mkdirs $(TESTSTRINGBUILDER)
-	@echo "Running test list"
-	@echo ""
-	@$(TESTSTRINGBUILDER)
 
 
 # mkdirs and clean rules
@@ -98,8 +65,9 @@ CHELPER_OBJS = $(patsubst $(CHELPER_DIR)/%.c, $(OBJ_DIR)/chelper_%.o, $(CHELPER_
 CHELPER_INTERNAL_OBJS = $(patsubst $(CHELPER_INTERNAL_DIR)/%.c, $(OBJ_DIR)/chelper_internal_%.o, $(CHELPER_INTERNAL_SOURCES))
 
 
-TEST_OBJS = $(patsubst $(TEST_DIR)/%.c, $(OBJ_DIR)/test_%.o, $(TEST_SOURCES))
-
+# test binarys
+TEST_BINS = $(patsubst $(TEST_DIR)/%.c, $(BIN_DIR)/test_%, $(TEST_SOURCES))
+tests: mkdirs $(TEST_BINS)
 
 
 # rules to build objects
@@ -122,25 +90,7 @@ $(LIBCHELPER): $(CHELPER_OBJS) $(CHELPER_INTERNAL_OBJS)
 	@ar rcs $@ $^
 	@echo ""
 
-$(TESTDICT): $(OBJ_DIR)/test_dictionary.o $(LIBCHELPER)
-	@echo "$(CC) $@"
-	@$(CC) -o $@ $(CFLAGS) $^
-	@echo "finished $@"
-	@echo ""
-
-$(TESTLIST): $(OBJ_DIR)/test_list.o $(LIBCHELPER)
-	@echo "$(CC) $@"
-	@$(CC) -o $@ $(CFLAGS) $^
-	@echo "finished $@"
-	@echo ""
-
-$(TESTSTRING): $(OBJ_DIR)/test_string.o $(LIBCHELPER)
-	@echo "$(CC) $@"
-	@$(CC) -o $@ $(CFLAGS) $^
-	@echo "finished $@"
-	@echo ""
-
-$(TESTSTRINGBUILDER): $(OBJ_DIR)/test_stringbuilder.o $(LIBCHELPER)
+$(BIN_DIR)/test_%: $(OBJ_DIR)/test_%.o $(LIBCHELPER)
 	@echo "$(CC) $@"
 	@$(CC) -o $@ $(CFLAGS) $^
 	@echo "finished $@"

@@ -8,7 +8,10 @@
 #define __CHELPSTRING__
 
 #include <stdbool.h>
-#include "common.h"
+
+typedef char *String;
+
+#include "arraylist.h"
 
 #define MAX_STRING_BUFFER 1023
 
@@ -53,9 +56,9 @@ bool StringContains(String src, String what);
 int StringCount(String src, String what);
 
 /*
-    Splits src into a LinkedList of strings delimitted by delims. Make sure to free the LinkedList afterwards.
+    Splits src into a list of strings delimitted by delims. Make sure to free the list afterwards.
 */
-LinkedList StringSplitIntoLinkedList(String src, String delims);
+ArrayList StringSplitIntoArrayList(String src, String delims);
 
 /*
     Returns a string with the format. Free afterwards.
@@ -67,9 +70,7 @@ String StringFormat(String fmt, ...);
 */
 String IntToString(int i);
 
-/*
-    string data args,
-*/
-DataArgs DataArgsString(String s);
+/*Copies a string for collections*/
+void *CopyString(void *a);
 
 #endif /* __CHELPSTRING__ */
