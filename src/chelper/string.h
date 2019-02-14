@@ -53,9 +53,9 @@ bool StringContains(String src, String what);
 int StringCount(String src, String what);
 
 /*
-    Splits src into a list of strings delimitted by delims. Make sure to free the list afterwards.
+    Splits src into a LinkedList of strings delimitted by delims. Make sure to free the LinkedList afterwards.
 */
-List StringSplitIntoList(String src, String delims);
+LinkedList StringSplitIntoLinkedList(String src, String delims);
 
 /*
     Returns a string with the format. Free afterwards.

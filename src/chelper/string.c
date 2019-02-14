@@ -8,7 +8,7 @@
 #include "string.h"
 #include "common.h"
 #include "internal/common.h"
-#include "list.h"
+#include "linkedlist.h"
 
 String StringCopy(String src)
 {
@@ -163,21 +163,21 @@ String StringReplace(String src, String replace, String with)
     return result;
 }
 
-List StringSplitIntoList(String src, String delims)
+LinkedList StringSplitIntoLinkedList(String src, String delims)
 {
     String token, rest, copy;
-    List result;
+    LinkedList result;
 
     assert(src != NULL);
     assert(delims != NULL);
 
     copy = StringCopy(src);
-    result = ListCreate(-1);
+    result = LinkedListCreate(-1);
 
     rest = copy;
     while ((token = strtok_r(rest, delims, &rest)) != NULL)
     {
-        ListAddLast(result, StringCopy(token), DataArgsString(token));
+        LinkedListAddLast(result, StringCopy(token), DataArgsString(token));
     }
 
     free(copy);
@@ -213,7 +213,7 @@ String IntToString(int i)
 }
 
 /*
-    Copys the string, for list args.
+    Copys the string, for LinkedList args.
 */
 void *CopyString(void *a)
 {

@@ -2,9 +2,9 @@
 #define __CHELPCOMMON__
 
 /*
-    This is the data type for lists.
+    This is the data type for LinkedLists.
 */
-typedef struct List *List;
+typedef struct LinkedList *LinkedList;
 
 /*
     This is the data type for dictionaries.

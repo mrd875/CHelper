@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "dictionary.h"
-#include "list.h"
+#include "linkedlist.h"
 #include "common.h"
 #include "internal/common.h"
 #include "string.h"
