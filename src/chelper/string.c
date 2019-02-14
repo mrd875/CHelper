@@ -52,6 +52,22 @@ String StringAdd(String src, const String s)
     return src;
 }
 
+String StringChop(String src, int x)
+{
+    int slen;
+
+    assert(src != NULL);
+
+    slen = strlen(src);
+    assert(x <= slen);
+
+    src = realloc(src, (slen - x + 1) * (sizeof(char)));
+    assert(src != NULL);
+    src[x] = '\0';
+
+    return src;
+}
+
 String StringConcat(String src, String src2)
 {
     String result;

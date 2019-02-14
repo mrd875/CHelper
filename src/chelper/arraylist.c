@@ -271,6 +271,20 @@ bool ArrayListAdd(ArrayList l, void *a)
     return ArrayListAddX(l, a, ArrayListLength(l));
 }
 
+bool ArrayListRemove(ArrayList l)
+{
+    assert(l != NULL);
+
+    return ArrayListRemoveX(l, ArrayListLength(l) - 1);
+}
+
+void *ArrayListGet(ArrayList l)
+{
+    assert(l != NULL);
+
+    return ArrayListGetX(l, ArrayListLength(l) - 1);
+}
+
 String ArrayListToStringInt(ArrayList l)
 {
     String result, temp;

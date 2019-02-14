@@ -49,6 +49,12 @@ bool ArrayListRemoveX(ArrayList l, size_t x);
 /* Adds the element to the end of the list. */
 bool ArrayListAdd(ArrayList l, void *a);
 
+/* Removes the last element from the end of the list. */
+bool ArrayListRemove(ArrayList l);
+
+/* Gets the last element in the list. */
+void *ArrayListGet(ArrayList l);
+
 /* Returns a new string of the list parsed as ints. Free the string afterwards. */
 String ArrayListToStringInt(ArrayList l);
 

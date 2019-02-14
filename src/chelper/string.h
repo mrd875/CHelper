@@ -73,4 +73,7 @@ String IntToString(int i);
 /*Copies a string for collections*/
 void *CopyString(void *a);
 
+/*Chops of chars off the string*/
+String StringChop(String src, int x);
+
 #endif /* __CHELPSTRING__ */
