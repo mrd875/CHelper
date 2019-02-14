@@ -4,26 +4,33 @@
 #include <stdbool.h>
 
 #include "../chelper/common.h"
-#include "../chelper/linkedlist.h"
+#include "../chelper/arraylist.h"
 #include "../chelper/string.h"
 
 int main(void)
 {
-    LinkedList l;
-    String s;
+    ArrayList l;
 
-    l = StringSplitIntoLinkedList("hi ther lol x f d da 1", " ");
+    l = ArrayListCreate(0, &free, NULL);
 
-    LinkedListDebugPrintString(l);
+    ArrayListAddEnd(l, IntCopy(-1));
+    for (int i = 0; i < 123; i++)
+    {
+        ArrayListAddEnd(l, IntCopy(i));
+    }
 
-    s = StringCopy("");
-    for (int i = 0; i < 134523; i++)
-        s = StringAdd(s, "hello");
+    ArrayListRemoveX(l, 0);
+    ArrayListRemoveX(l, 0);
+    ArrayListRemoveX(l, 0);
+    ArrayListRemoveX(l, 0);
+    ArrayListRemoveX(l, 50);
 
-    printf("%s\n", s);
+    for (int i = 0; i < ArrayListLength(l); i++)
+    {
+        printf("%d ", *(int *)ArrayListGetX(l, i));
+    }
 
-    free(s);
-    LinkedListFree(l);
+    ArrayListFree(l);
 
     return 0;
 }

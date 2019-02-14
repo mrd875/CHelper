@@ -1,6 +1,8 @@
 #ifndef __CHELPCOMMON__
 #define __CHELPCOMMON__
 
+typedef void (*free_fn_t)(void *data);
+typedef void *(*copy_fn_t)(void *data);
 /*
     This is the data type for LinkedLists.
 */
