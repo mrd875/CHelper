@@ -209,4 +209,9 @@ bool ListCursorAdd(List l, void *data, DataArgs dataArgs);
 */
 bool ListCursorDelete(List l);
 
+/*
+    Data args list.
+*/
+DataArgs DataArgsList();
+
 #endif /* __CHELPLIST__ */

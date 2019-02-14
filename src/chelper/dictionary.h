@@ -25,6 +25,11 @@ void DictionaryClear(Dictionary d);
 Dictionary DictionaryCopy(Dictionary d);
 
 /*
+    Data args dictionary
+*/
+DataArgs DataArgsDictionary();
+
+/*
     Returns how many keys are in the dictionary.
 */
 int DictionarySize(Dictionary d);

@@ -261,8 +261,29 @@ List DictionaryKeys(Dictionary d)
 
         kv = ListCursorGet(d->data);
 
-        ListAddLast(l, StringCopy(kv->key), DataArgsString());
+        ListAddLast(l, StringCopy(kv->key), DataArgsString(kv->key));
     }
 
     return l;
+}
+
+void FreeDictionary(void *a)
+{
+    DictionaryFree((Dictionary)a);
+}
+
+void *CopyDictionary(void *a)
+{
+    return DictionaryCopy((Dictionary)a);
+}
+
+DataArgs DataArgsDictionary()
+{
+    DataArgs d;
+
+    d.size = sizeof(struct Dictionary);
+    d.free_routine = &FreeDictionary;
+    d.copy_routine = &CopyDictionary;
+
+    return d;
 }

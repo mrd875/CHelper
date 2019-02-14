@@ -18,6 +18,11 @@
 String StringCopy(String src);
 
 /*
+    Adds the string s to src. May change the address of src, so use the return value.
+*/
+String StringAdd(String src, const String s);
+
+/*
     Concats the two strings together and returns it. Free afterwards.
 */
 String StringConcat(String src, String src2);
@@ -61,5 +66,10 @@ String StringFormat(String fmt, ...);
     Returns a string being the int. Free afterwards.
 */
 String IntToString(int i);
+
+/*
+    string data args,
+*/
+DataArgs DataArgsString(String s);
 
 #endif /* __CHELPSTRING__ */

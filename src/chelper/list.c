@@ -778,19 +778,36 @@ void ListFilter(List l, bool (*comparator)(void *, void *), void *comparisonArg)
     }
 }
 
+void FreeList(void *a)
+{
+    ListFree((List)a);
+}
+
+void *CopyList(void *a)
+{
+    return ListCopy((List)a);
+}
+
+DataArgs DataArgsList()
+{
+    DataArgs d;
+
+    d.size = sizeof(struct List);
+    d.free_routine = &FreeList;
+    d.copy_routine = &CopyList;
+
+    return d;
+}
+
 String ListGetStringInt(List l)
 {
     ListNode ln;
-    String result, temp, temp2;
+    String result, temp;
     int *i;
 
     assert(l != NULL);
 
-    result = StringCopy("");
-
-    temp = result;
-    result = StringConcat(result, "[");
-    free(temp);
+    result = StringCopy("[");
 
     ln = l->head;
     while (ln != NULL)
@@ -798,29 +815,20 @@ String ListGetStringInt(List l)
         i = ln->data;
         ln = ln->next;
 
-        temp = result;
         if (i != NULL)
         {
-            temp2 = IntToString(*i);
-            result = StringConcat(result, temp2);
-            free(temp2);
-        }
-        else
-            result = StringConcat(result, "NULL");
-
-        free(temp);
-
-        if (ln != NULL)
-        {
-            temp = result;
-            result = StringConcat(result, ", ");
+            temp = IntToString(*i);
+            result = StringAdd(result, temp);
             free(temp);
         }
+        else
+            result = StringAdd(result, "NULL");
+
+        if (ln != NULL)
+            result = StringAdd(result, ", ");
     }
 
-    temp = result;
-    result = StringConcat(result, "]");
-    free(temp);
+    result = StringAdd(result, "]");
 
     return result;
 }
@@ -828,15 +836,11 @@ String ListGetStringInt(List l)
 String ListGetStringString(List l)
 {
     ListNode ln;
-    String i, result, temp;
+    String i, result;
 
     assert(l != NULL);
 
-    result = StringCopy("");
-
-    temp = result;
-    result = StringConcat(result, "[");
-    free(temp);
+    result = StringCopy("[");
 
     ln = l->head;
     while (ln != NULL)
@@ -844,33 +848,20 @@ String ListGetStringString(List l)
         i = ln->data;
         ln = ln->next;
 
-        temp = result;
-        result = StringConcat(result, "\"");
-        free(temp);
+        result = StringAdd(result, "\"");
 
-        temp = result;
         if (i != NULL)
-            result = StringConcat(result, i);
+            result = StringAdd(result, i);
         else
-            result = StringConcat(result, "NULL");
+            result = StringAdd(result, "NULL");
 
-        free(temp);
-
-        temp = result;
-        result = StringConcat(result, "\"");
-        free(temp);
+        result = StringAdd(result, "\"");
 
         if (ln != NULL)
-        {
-            temp = result;
-            result = StringConcat(result, ", ");
-            free(temp);
-        }
+            result = StringAdd(result, ", ");
     }
 
-    temp = result;
-    result = StringConcat(result, "]");
-    free(temp);
+    result = StringAdd(result, "]");
 
     return result;
 }

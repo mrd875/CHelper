@@ -47,11 +47,6 @@ int *IntCopy(int i);
 DataArgs DataArgsNULL();
 
 /*
-    string data args, make sure to update the size to reflect how big ur string is
-*/
-DataArgs DataArgsString();
-
-/*
     int data args
 */
 DataArgs DataArgsInt();

@@ -25,6 +25,25 @@ String StringCopy(String src)
     return result;
 }
 
+String StringAdd(String src, const String s)
+{
+    int slen, slen2;
+
+    assert(src != NULL);
+    assert(s != NULL);
+
+    slen = strlen(src);
+    slen2 = strlen(s);
+
+    src = realloc(src, (slen + slen2 + 1) * (sizeof(char)));
+    assert(src != NULL);
+
+    memset(&src[slen], '\0', slen2 + 1);
+    strcpy(&src[slen], s);
+
+    return src;
+}
+
 String StringConcat(String src, String src2)
 {
     String result;
@@ -148,7 +167,6 @@ List StringSplitIntoList(String src, String delims)
 {
     String token, rest, copy;
     List result;
-    DataArgs dataArgs;
 
     assert(src != NULL);
     assert(delims != NULL);
@@ -159,10 +177,7 @@ List StringSplitIntoList(String src, String delims)
     rest = copy;
     while ((token = strtok_r(rest, delims, &rest)) != NULL)
     {
-        dataArgs = DataArgsString();
-        dataArgs.size = sizeof(char) * (strlen(token) + 1);
-
-        ListAddLast(result, StringCopy(token), dataArgs);
+        ListAddLast(result, StringCopy(token), DataArgsString(token));
     }
 
     free(copy);
@@ -195,4 +210,27 @@ String StringFormat(String fmt, ...)
 String IntToString(int i)
 {
     return StringFormat("%d", i);
+}
+
+/*
+    Copys the string, for list args.
+*/
+void *CopyString(void *a)
+{
+    return (void *)StringCopy((String)a);
+}
+
+DataArgs DataArgsString(String s)
+{
+    DataArgs a;
+
+    if (s == NULL)
+        a.size = sizeof(char);
+    else
+        a.size = (sizeof(char)) * (strlen(s) + 1);
+
+    a.free_routine = &free;
+    a.copy_routine = &CopyString;
+
+    return a;
 }

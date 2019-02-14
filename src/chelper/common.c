@@ -5,7 +5,6 @@
 
 #include "common.h"
 #include "internal/common.h"
-#include "string.h"
 
 void PrintError(String calledFrom)
 {
@@ -41,14 +40,6 @@ void *CopyInt(void *a)
     return (void *)IntCopy(i);
 }
 
-/*
-    Copys the string, for list args.
-*/
-void *CopyString(void *a)
-{
-    return (void *)StringCopy((String)a);
-}
-
 DataArgs DataArgsNULL()
 {
     DataArgs a;
@@ -67,17 +58,6 @@ DataArgs DataArgsInt()
     a.size = sizeof(int);
     a.free_routine = &free;
     a.copy_routine = &CopyInt;
-
-    return a;
-}
-
-DataArgs DataArgsString()
-{
-    DataArgs a;
-
-    a.size = sizeof(char); /*Make sure caller updates this...*/
-    a.free_routine = &free;
-    a.copy_routine = &CopyString;
 
     return a;
 }
