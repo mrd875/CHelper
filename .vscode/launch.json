@@ -5,172 +5,35 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(gdb Windows) Launch testlist",
+      "name": "Launch gdb (WSL) test",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/bin/testlist.exe",
-      "args": [],
+      "program": "./build/bin/test_test",
+      "args": [""],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
+      "cwd": "/mnt/c/Users/LappyVM/projects/chelper",
       "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:\\ProgramData\\msys64\\mingw64\\bin\\gdb.exe",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Windows) testlist"
-    },
-    {
-      "name": "(gdb Windows) Launch testdict",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/testdict.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:\\ProgramData\\msys64\\mingw64\\bin\\gdb.exe",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Windows) testdict"
-    },
-    {
-      "name": "(gdb Windows) Launch teststring",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/teststring.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:\\ProgramData\\msys64\\mingw64\\bin\\gdb.exe",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Windows) teststring"
-    },
-    {
-      "name": "(gdb Windows) Launch teststringbuilder",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/teststringbuilder.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:\\ProgramData\\msys64\\mingw64\\bin\\gdb.exe",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Windows) teststringbuilder"
-    },
-    {
-      "name": "(gdb Linux) Launch testlist",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/testlist",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Linux) testlist"
-    },
-    {
-      "name": "(gdb Linux) Launch testdict",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/testdict",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Linux) testdict"
-    },
-    {
-      "name": "(gdb Linux) Launch teststring",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/teststring",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Linux) teststring"
-    },
-    {
-      "name": "(gdb Linux) Launch teststringbuilder",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/bin/teststringbuilder",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "/usr/bin/gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ],
-      "preLaunchTask": "build (Linux) teststringbuilder"
+      "externalConsole": true,
+      "windows": {
+        "MIMode": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      },
+      "pipeTransport": {
+        "pipeCwd": "${cwd}",
+        "pipeProgram": "c:\\windows\\sysnative\\bash.exe",
+        "pipeArgs": ["-c"],
+        "debuggerPath": "/usr/bin/gdb"
+      },
+      "sourceFileMap": {
+        "/mnt/c": "C:\\"
+      },
+      "preLaunchTask": "build tests"
     }
   ]
 }

@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build (Windows) default",
+      "label": "build default",
       "type": "shell",
-      "command": "mingw32-make",
+      "command": "make",
       "args": [""],
       "group": {
         "kind": "build",
@@ -12,66 +12,17 @@
       }
     },
     {
-      "label": "build (Windows) testlist",
-      "type": "shell",
-      "command": "mingw32-make",
-      "args": ["testlist"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Windows) testdict",
-      "type": "shell",
-      "command": "mingw32-make",
-      "args": ["testdict"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Windows) teststring",
-      "type": "shell",
-      "command": "mingw32-make",
-      "args": ["teststring"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Windows) teststringbuilder",
-      "type": "shell",
-      "command": "mingw32-make",
-      "args": ["teststringbuilder"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Linux) default",
+      "label": "build tests",
       "type": "shell",
       "command": "make",
-      "args": [""],
+      "args": ["tests"],
       "problemMatcher": []
     },
     {
-      "label": "build (Linux) testlist",
+      "label": "build clean-all",
       "type": "shell",
       "command": "make",
-      "args": ["testlist"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Linux) testdict",
-      "type": "shell",
-      "command": "make",
-      "args": ["testdict"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Linux) teststring",
-      "type": "shell",
-      "command": "make",
-      "args": ["teststring"],
-      "problemMatcher": []
-    },
-    {
-      "label": "build (Linux) teststringbuilder",
-      "type": "shell",
-      "command": "make",
-      "args": ["teststringbuilder"],
+      "args": ["clean-all"],
       "problemMatcher": []
     }
   ]

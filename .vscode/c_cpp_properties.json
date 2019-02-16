@@ -1,27 +1,19 @@
 {
   "configurations": [
     {
-      "name": "Win32",
-      "includePath": [
-        "${workspaceFolder}/**",
-        "${workspaceFolder}/../c_include/"
-      ],
-      "defines": ["_DEBUG", "UNICODE", "_UNICODE", "__CHELPDEBUG__"],
-      "compilerPath": "C:\\ProgramData\\msys64\\mingw64\\bin\\gcc.exe",
-      "cStandard": "c99",
-      "cppStandard": "c++17",
-      "intelliSenseMode": "msvc-x64"
-    },
-    {
       "name": "Linux",
-      "includePath": [
-        "${workspaceFolder}/**"
-      ],
-      "defines": ["_DEBUG", "UNICODE", "_UNICODE", "__CHELPDEBUG__"],
+      "intelliSenseMode": "gcc-x64",
       "compilerPath": "/usr/bin/gcc",
+      "includePath": ["${workspaceFolder}/**"],
+      "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE",
+        "__USE_MISC",
+        "__CHELPDEBUG__"
+      ],
       "cStandard": "c99",
-      "cppStandard": "c++17",
-      "intelliSenseMode": "gcc-x64"
+      "cppStandard": "c++17"
     }
   ],
   "version": 4
