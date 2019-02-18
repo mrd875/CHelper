@@ -35,7 +35,7 @@ void *CopyString(void *a)
 
 String StringAdd(String src, const String s)
 {
-    int slen, slen2;
+    size_t slen, slen2;
 
     assert(src != NULL);
     assert(s != NULL);
@@ -52,14 +52,15 @@ String StringAdd(String src, const String s)
     return src;
 }
 
-String StringChop(String src, int x)
+String StringChop(String src, size_t x)
 {
-    int slen;
+    size_t slen;
 
     assert(src != NULL);
 
     slen = strlen(src);
-    assert(x <= slen);
+    if (x > slen)
+        x = slen;
 
     src = realloc(src, (slen - x + 1) * (sizeof(char)));
     assert(src != NULL);
@@ -85,17 +86,16 @@ String StringConcat(String src, String src2)
     return result;
 }
 
-String StringGetSubString(String src, int i, int size)
+String StringGetSubString(String src, size_t i, size_t size)
 {
     String result;
-    int slen;
+    size_t slen;
 
     assert(src != NULL);
-    assert(i >= 0);
-    assert(size >= 0);
 
     slen = strlen(src);
-    assert(i < slen);
+    if (i > slen)
+        i = slen;
 
     debugp("Getting substr");
     result = calloc(sizeof(char), size + 1);
@@ -132,9 +132,9 @@ bool StringContains(String src, String what)
     return true;
 }
 
-int StringCount(String src, String what)
+size_t StringCount(String src, String what)
 {
-    int i, whatlen;
+    size_t i, whatlen;
     String sub;
 
     assert(src != NULL);
@@ -156,7 +156,7 @@ int StringCount(String src, String what)
 String StringReplace(String src, String replace, String with)
 {
     String result, s;
-    int repLen, withLen, i;
+    size_t repLen, withLen, i;
 
     assert(src != NULL);
     assert(replace != NULL);
@@ -248,6 +248,40 @@ bool EqualString(void *a, void *b)
         return false;
 
     if (strcmp((char *)a, (char *)b) != 0)
+        return false;
+
+    return true;
+}
+
+bool StringBeginsWith(String src, String what)
+{
+    size_t prelen;
+
+    assert(src != NULL);
+    assert(what != NULL);
+
+    prelen = strlen(what);
+
+    if (strncmp(src, what, prelen) != 0)
+        return false;
+
+    return true;
+}
+
+bool StringEndsWith(String src, String what)
+{
+    size_t prelen, srclen;
+
+    assert(src != NULL);
+    assert(what != NULL);
+
+    prelen = strlen(what);
+    srclen = strlen(src);
+
+    if (srclen < prelen)
+        return false;
+
+    if (strncmp(src + srclen - prelen, what, prelen) != 0)
         return false;
 
     return true;

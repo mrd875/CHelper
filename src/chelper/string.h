@@ -33,7 +33,7 @@ String StringConcat(String src, String src2);
 /*
     Returns a sub string of s. Make sure to free it after.
 */
-String StringGetSubString(String src, int i, int size);
+String StringGetSubString(String src, size_t i, size_t size);
 
 /*
     Returns a string with all occurrences replaced. Make sure to free it after.
@@ -53,7 +53,7 @@ bool StringContains(String src, String what);
 /*
     Counts the the substring.
 */
-int StringCount(String src, String what);
+size_t StringCount(String src, String what);
 
 /*
     Splits src into a list of strings delimitted by delims. Make sure to free the list afterwards.
@@ -74,9 +74,15 @@ String IntToString(int i);
 void *CopyString(void *a);
 
 /*Chops of chars off the string*/
-String StringChop(String src, int x);
+String StringChop(String src, size_t x);
 
 /*String compare*/
 bool EqualString(void *a, void *b);
+
+/*Begins with str*/
+bool StringBeginsWith(String src, String what);
+
+/*Ends with str*/
+bool StringEndsWith(String src, String what);
 
 #endif /* __CHELPSTRING__ */
