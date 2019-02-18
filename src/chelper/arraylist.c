@@ -345,15 +345,12 @@ ArrayList ArrayListConcat(ArrayList l, ArrayList l2)
 ArrayList ArrayListGetSubArrayList(ArrayList l, size_t i, size_t size)
 {
     ArrayList answer;
-    bool o;
     assert(l != NULL);
-    assert(i < ArrayListLength(l));
 
     answer = ArrayListCopy(l);
     answer->capacity = 0;
 
-    o = ArrayListTrim(answer, i, size);
-    assert(o == true);
+    ArrayListTrim(answer, i, size);
 
     return answer;
 }
@@ -361,16 +358,13 @@ ArrayList ArrayListGetSubArrayList(ArrayList l, size_t i, size_t size)
 ArrayList ArrayListFilter(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
 {
     ArrayList answer;
-    bool o;
     assert(l != NULL);
     assert(compare_fn != NULL);
 
     answer = ArrayListCopy(l);
     answer->capacity = 0;
 
-    o = ArrayListRemoveIf(answer, compare_fn, compare_arg);
-
-    assert(o == true);
+    ArrayListRemoveIf(answer, compare_fn, compare_arg);
 
     return answer;
 }
@@ -481,16 +475,36 @@ bool ArrayListAddAll(ArrayList l, ArrayList l2)
 
 bool ArrayListRemoveRange(ArrayList l, size_t i, size_t size)
 {
+    size_t ii;
+    bool o;
+    assert(l != NULL);
+
+    for (ii = 0; ii < size; ii++)
+    {
+        o = ArrayListRemoveX(l, i);
+
+        if (o == false)
+            return false;
+    }
+
+    return true;
 }
 
 bool ArrayListTrim(ArrayList l, size_t i, size_t size)
 {
-    size_t ii;
+    size_t ii, keep_end;
+    bool o;
     assert(l != NULL);
-    assert(i < ArrayListLength(l));
 
-    for (ii = 0; ii < size; ii++)
+    while (ArrayListRemoveX(l, i + size) == true)
+        ;
+
+    for (ii = 0; ii < i; ii++)
     {
+        o = ArrayListRemoveX(l, 0);
+
+        if (o == false)
+            return false;
     }
 
     return true;
