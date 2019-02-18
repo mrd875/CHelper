@@ -492,7 +492,7 @@ bool ArrayListRemoveRange(ArrayList l, size_t i, size_t size)
 
 bool ArrayListTrim(ArrayList l, size_t i, size_t size)
 {
-    size_t ii, keep_end;
+    size_t ii;
     bool o;
     assert(l != NULL);
 
