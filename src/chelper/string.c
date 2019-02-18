@@ -235,3 +235,20 @@ String IntToString(int i)
 {
     return StringFormat("%d", i);
 }
+
+bool EqualString(void *a, void *b)
+{
+    if (a == b)
+        return true;
+
+    if (a == NULL)
+        return false;
+
+    if (b == NULL)
+        return false;
+
+    if (strcmp((char *)a, (char *)b) != 0)
+        return false;
+
+    return true;
+}

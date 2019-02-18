@@ -5,35 +5,23 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch gdb (WSL) test",
+      "name": "(gdb Linux) Launch test_arraytest",
       "type": "cppdbg",
       "request": "launch",
-      "program": "./build/bin/test_test",
-      "args": [""],
+      "program": "${workspaceFolder}/build/bin/test_arraytest",
+      "args": [],
       "stopAtEntry": false,
-      "cwd": "/mnt/c/Users/LappyVM/projects/chelper",
+      "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": true,
-      "windows": {
-        "MIMode": "gdb",
-        "setupCommands": [
-          {
-            "description": "Enable pretty-printing for gdb",
-            "text": "-enable-pretty-printing",
-            "ignoreFailures": true
-          }
-        ]
-      },
-      "pipeTransport": {
-        "pipeCwd": "${cwd}",
-        "pipeProgram": "c:\\windows\\sysnative\\bash.exe",
-        "pipeArgs": ["-c"],
-        "debuggerPath": "/usr/bin/gdb"
-      },
-      "sourceFileMap": {
-        "/mnt/c": "C:\\"
-      },
-      "preLaunchTask": "build tests"
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }

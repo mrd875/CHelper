@@ -76,4 +76,7 @@ void *CopyString(void *a);
 /*Chops of chars off the string*/
 String StringChop(String src, int x);
 
+/*String compare*/
+bool EqualString(void *a, void *b);
+
 #endif /* __CHELPSTRING__ */

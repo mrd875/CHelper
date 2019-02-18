@@ -35,3 +35,48 @@ void *CopyInt(void *a)
 
     return IntCopy(*(int *)a);
 }
+
+bool EqualInt(void *a, void *b)
+{
+    if (a == b)
+        return true;
+
+    if (a == NULL)
+        return false;
+
+    if (b == NULL)
+        return false;
+
+    if (*(int *)a != *(int *)b)
+        return false;
+
+    return true;
+}
+
+bool LessInt(void *a, void *b)
+{
+    if (a == NULL)
+        return false;
+
+    if (b == NULL)
+        return false;
+
+    if (*(int *)a >= *(int *)b)
+        return false;
+
+    return true;
+}
+
+bool GreatInt(void *a, void *b)
+{
+    if (a == NULL)
+        return false;
+
+    if (b == NULL)
+        return false;
+
+    if (*(int *)a <= *(int *)b)
+        return false;
+
+    return true;
+}

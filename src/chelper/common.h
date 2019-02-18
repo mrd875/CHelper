@@ -1,10 +1,16 @@
 #ifndef __CHELPCOMMON__
 #define __CHELPCOMMON__
 
+#include <stdbool.h>
+
 /*The function pointer to free data.*/
 typedef void (*free_fn_t)(void *data);
 /*The function pointer to copy data.*/
 typedef void *(*copy_fn_t)(void *data);
+/*The function pointer to compare data.*/
+typedef bool (*compare_fn_t)(void *data, void *compare_arg);
+/*The foreach function pointer*/
+typedef void (*foreach_fn_t)(void *data, size_t i);
 
 #include "string.h"
 
@@ -20,5 +26,14 @@ int *IntCopy(int i);
 
 /*Copy and int for lists and collections*/
 void *CopyInt(void *a);
+
+/*Compares the arg for ints.*/
+bool EqualInt(void *a, void *b);
+
+/*Compares the arg for ints.*/
+bool LessInt(void *a, void *b);
+
+/*Compares the arg for ints.*/
+bool GreatInt(void *a, void *b);
 
 #endif /* __CHELPCOMMON__ */

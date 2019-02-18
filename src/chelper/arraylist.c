@@ -70,6 +70,7 @@ ArrayList ArrayListCopy(ArrayList l)
 {
     ArrayList l2;
     size_t i, len;
+    bool o;
 
     assert(l != NULL);
 
@@ -78,7 +79,10 @@ ArrayList ArrayListCopy(ArrayList l)
     l2 = ArrayListCreate(l->capacity, l->free_fn, l->copy_fn);
 
     for (i = 0; i < len; i++)
-        ArrayListAdd(l2, _ArrayListCopyItem(l, l->arr[i]));
+    {
+        o = ArrayListAdd(l2, _ArrayListCopyItem(l, l->arr[i]));
+        assert(o == true);
+    }
 
     return l2;
 }
@@ -192,11 +196,29 @@ bool ArrayListIsEmpty(ArrayList l)
     return true;
 }
 
+bool ArrayListSetCapacity(ArrayList l, size_t size)
+{
+    assert(l != NULL);
+
+    if (size != 0 && size < ArrayListLength(l))
+    {
+        SetErrorMessage("Set capacity below the length of list");
+        return false;
+    }
+
+    l->capacity = size;
+    return true;
+}
+
 bool ArrayListSetX(ArrayList l, void *a, size_t x)
 {
     assert(l != NULL);
 
-    assert(x < ArrayListLength(l));
+    if (x >= ArrayListLength(l))
+    {
+        SetErrorMessage("Index out of bounds");
+        return false;
+    }
 
     _ArrayListFreeItem(l, l->arr[x]);
 
@@ -208,7 +230,11 @@ void *ArrayListGetX(ArrayList l, size_t x)
 {
     assert(l != NULL);
 
-    assert(x < ArrayListLength(l));
+    if (x >= ArrayListLength(l))
+    {
+        SetErrorMessage("Index out of bounds");
+        return NULL;
+    }
 
     return l->arr[x];
 }
@@ -221,10 +247,17 @@ bool ArrayListAddX(ArrayList l, void *a, size_t x)
 
     len = ArrayListLength(l);
 
-    assert(x <= len);
+    if (x > len)
+    {
+        SetErrorMessage("Index out of bounds");
+        return false;
+    }
 
     if (ArrayListIsFull(l) == true)
+    {
+        SetErrorMessage("Adding to full list");
         return false;
+    }
 
     if (len >= l->size)
         _ArrayListExpandArray(l);
@@ -244,12 +277,19 @@ bool ArrayListRemoveX(ArrayList l, size_t x)
 
     assert(l != NULL);
 
+    if (ArrayListIsEmpty(l) == true)
+    {
+        SetErrorMessage("Removing from empty list");
+        return false;
+    }
+
     len = ArrayListLength(l);
 
-    assert(x < len);
-
-    if (ArrayListIsEmpty(l) == true)
+    if (x >= len)
+    {
+        SetErrorMessage("Index out of bounds");
         return false;
+    }
 
     _ArrayListFreeItem(l, l->arr[x]);
 
@@ -283,6 +323,177 @@ void *ArrayListGet(ArrayList l)
     assert(l != NULL);
 
     return ArrayListGetX(l, ArrayListLength(l) - 1);
+}
+
+ArrayList ArrayListConcat(ArrayList l, ArrayList l2)
+{
+    ArrayList answer;
+    bool o;
+    assert(l != NULL);
+    assert(l2 != NULL);
+
+    answer = ArrayListCopy(l);
+    answer->capacity = 0;
+
+    o = ArrayListAddAll(answer, l2);
+
+    assert(o == true);
+
+    return answer;
+}
+
+ArrayList ArrayListGetSubArrayList(ArrayList l, size_t i, size_t size)
+{
+    ArrayList answer;
+    bool o;
+    assert(l != NULL);
+    assert(i < ArrayListLength(l));
+
+    answer = ArrayListCopy(l);
+    answer->capacity = 0;
+
+    o = ArrayListTrim(answer, i, size);
+    assert(o == true);
+
+    return answer;
+}
+
+ArrayList ArrayListFilter(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    ArrayList answer;
+    bool o;
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    answer = ArrayListCopy(l);
+    answer->capacity = 0;
+
+    o = ArrayListRemoveIf(answer, compare_fn, compare_arg);
+
+    assert(o == true);
+
+    return answer;
+}
+
+int ArrayListIndexOf(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    size_t i, len;
+
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    len = ArrayListLength(l);
+
+    for (i = 0; i < len; i++)
+    {
+        if (compare_fn(l->arr[i], compare_arg) == false)
+            continue;
+
+        return i;
+    }
+
+    return -1;
+}
+
+size_t ArrayListCount(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    size_t count, i, len;
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    count = 0;
+    len = ArrayListLength(l);
+
+    for (i = 0; i < len; i++)
+    {
+        if (compare_fn(l->arr[i], compare_arg) == false)
+            continue;
+
+        count++;
+    }
+
+    return count;
+}
+
+bool ArrayListHas(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    if (ArrayListIndexOf(l, compare_fn, compare_arg) == -1)
+        return false;
+
+    return true;
+}
+
+void ArrayListForEach(ArrayList l, foreach_fn_t foreach_fn)
+{
+    size_t i, len;
+
+    assert(l != NULL);
+    assert(foreach_fn != NULL);
+
+    len = ArrayListLength(l);
+
+    for (i = 0; i < len; i++)
+    {
+        foreach_fn(l->arr[i], i);
+    }
+}
+
+bool ArrayListRemoveIf(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    int i;
+    bool o;
+
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    while ((i = ArrayListIndexOf(l, compare_fn, compare_arg)) != -1)
+    {
+        o = ArrayListRemoveX(l, i);
+
+        assert(o == true);
+    }
+
+    return true;
+}
+
+bool ArrayListAddAll(ArrayList l, ArrayList l2)
+{
+    size_t i, len;
+    bool o;
+    assert(l != NULL);
+    assert(l2 != NULL);
+
+    len = ArrayListLength(l2);
+
+    for (i = 0; i < len; i++)
+    {
+        o = ArrayListAdd(l, _ArrayListCopyItem(l2, l2->arr[i]));
+
+        if (o == false)
+            return false;
+    }
+
+    return true;
+}
+
+bool ArrayListRemoveRange(ArrayList l, size_t i, size_t size)
+{
+}
+
+bool ArrayListTrim(ArrayList l, size_t i, size_t size)
+{
+    size_t ii;
+    assert(l != NULL);
+    assert(i < ArrayListLength(l));
+
+    for (ii = 0; ii < size; ii++)
+    {
+    }
+
+    return true;
 }
 
 String ArrayListToStringInt(ArrayList l)
@@ -319,11 +530,54 @@ String ArrayListToStringInt(ArrayList l)
     return result;
 }
 
+String ArrayListToStringString(ArrayList l)
+{
+    String result, a, temp;
+    size_t i, len;
+
+    assert(l != NULL);
+
+    len = ArrayListLength(l);
+
+    result = StringCopy("[");
+
+    for (i = 0; i < len; i++)
+    {
+        a = ArrayListGetX(l, i);
+
+        if (a == NULL)
+            result = StringAdd(result, "NULL");
+        else
+        {
+            temp = StringFormat("\"%s\"", a);
+            result = StringAdd(result, temp);
+            free(temp);
+        }
+
+        if (i < len - 1)
+            result = StringAdd(result, ", ");
+    }
+
+    result = StringAdd(result, "]");
+
+    return result;
+}
+
 void ArrayListPrintInt(ArrayList l)
 {
     String temp;
 
     temp = ArrayListToStringInt(l);
+    printf("%s\n", temp);
+
+    free(temp);
+}
+
+void ArrayListPrintString(ArrayList l)
+{
+    String temp;
+
+    temp = ArrayListToStringString(l);
     printf("%s\n", temp);
 
     free(temp);
