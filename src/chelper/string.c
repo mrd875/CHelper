@@ -106,7 +106,7 @@ String StringGetSubString(String src, size_t i, size_t size)
     return result;
 }
 
-int StringFind(String src, String what)
+int StringIndexOf(String src, String what)
 {
     String found;
 
@@ -126,7 +126,7 @@ bool StringContains(String src, String what)
     assert(src != NULL);
     assert(what != NULL);
 
-    if (StringFind(src, what) == -1)
+    if (StringIndexOf(src, what) == -1)
         return false;
 
     return true;

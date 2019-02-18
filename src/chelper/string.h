@@ -43,7 +43,7 @@ String StringReplace(String src, String replace, String with);
 /*
     Returns the start index of the found substring. -1 if not found.
 */
-int StringFind(String src, String what);
+int StringIndexOf(String src, String what);
 
 /*
     Returns if the string contains the substring.

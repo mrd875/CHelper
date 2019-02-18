@@ -81,7 +81,7 @@ size_t ArrayListCount(ArrayList l, compare_fn_t compare_fn, void *compare_arg);
 /*
     Searches the arraylist given a compare function and compare argument, will return if the array has the element.
 */
-bool ArrayListHas(ArrayList l, compare_fn_t compare_fn, void *compare_arg);
+bool ArrayListContains(ArrayList l, compare_fn_t compare_fn, void *compare_arg);
 
 /*
     Does the function on every element of the List.

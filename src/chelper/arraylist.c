@@ -409,7 +409,7 @@ size_t ArrayListCount(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
     return count;
 }
 
-bool ArrayListHas(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+bool ArrayListContains(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
 {
     assert(l != NULL);
     assert(compare_fn != NULL);
