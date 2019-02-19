@@ -64,7 +64,7 @@ String StringChop(String src, size_t x)
 
     src = realloc(src, (slen - x + 1) * (sizeof(char)));
     assert(src != NULL);
-    src[x] = '\0';
+    src[slen - x] = '\0';
 
     return src;
 }

@@ -56,7 +56,10 @@ void EnsureContents(ArrayList l, String expect)
     }
 
     if (strcmp(expect, is))
+    {
+        printf("%s\n\n%s\n\n", expect, is);
         fail("Contents do not match!");
+    }
 
     free(is);
 }
@@ -75,7 +78,7 @@ int main(void)
     EnsureSize(l, 0);
     EnsureContents(l, build);
 
-    for (i = -200; i < 201; i++)
+    for (i = -2000; i < 2001; i++)
     {
         size++;
         temp = StringFormat("%d ", i);
@@ -86,6 +89,27 @@ int main(void)
         ArrayListAdd(l, IntCopy(i));
         EnsureSize(l, size);
         EnsureContents(l, build);
+    }
+
+    for (i = -2000; i < 1997; i++)
+    {
+        size--;
+        temp = StringFormat("%d ", *(int *)ArrayListGet(l));
+        build = StringChop(build, strlen(temp));
+        free(temp);
+        printf("Removing %d...\n", *(int *)ArrayListGet(l));
+
+        ArrayListRemove(l);
+        EnsureSize(l, size);
+        EnsureContents(l, build);
+    }
+
+    while (1)
+    {
+        for (i = 0; i < 30; i++)
+            ArrayListAdd(l, IntCopy(i));
+        for (i = 0; i < 30; i++)
+            ArrayListRemove(l);
     }
 
     ArrayListFree(l);
