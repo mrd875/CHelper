@@ -261,6 +261,7 @@ bool DictionaryHas(Dictionary d, String key)
 void *DictionaryGet(Dictionary d, String key)
 {
     ArrayList l;
+    DictionaryKVP kv;
 
     assert(d != NULL);
     assert(key != NULL);
@@ -274,7 +275,10 @@ void *DictionaryGet(Dictionary d, String key)
     if (ArrayListCursorSearchNext(l, &DictionaryKVPKeyEqual, key) == false)
         return NULL;
 
-    return ArrayListCursorGet(l);
+    kv = ArrayListCursorGet(l);
+    assert(kv != NULL);
+
+    return kv->data;
 }
 
 /*Resizes the dictionary.*/
@@ -472,7 +476,7 @@ String DictionaryToStringInt(Dictionary d)
                 result = StringAdd(result, "NULL}\n");
             else
             {
-                temp = StringFormat("\"%d\"}\n", *(int *)kv->data);
+                temp = StringFormat("%d}\n", *(int *)kv->data);
                 result = StringAdd(result, temp);
                 free(temp);
             }
