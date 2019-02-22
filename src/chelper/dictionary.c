@@ -42,7 +42,7 @@ struct DictionaryKVP
 /*The maximum load factor before expanding the array.*/
 #define DictionaryMaxLoadFactor 1.5
 /*The minimuum load factor before shrinking the array.*/
-#define DictionaryMinLoadFactor 1.5
+#define DictionaryMinLoadFactor 0.5
 
 /*Creates the KVP*/
 DictionaryKVP DictionaryKVPCreate(Dictionary d, String key, void *data)
@@ -405,4 +405,164 @@ bool DictionarySet(Dictionary d, String key, void *data)
     return true;
 }
 
-ArrayList DictionaryKeys(Dictionary d);
+ArrayList DictionaryKeys(Dictionary d)
+{
+    ArrayList result, l;
+    size_t i, size;
+    DictionaryKVP kv;
+
+    assert(d != NULL);
+
+    result = ArrayListCreate(-1, &free, &CopyString);
+
+    size = d->size;
+
+    for (i = 0; i < size; i++)
+    {
+        l = d->data[i];
+
+        if (l == NULL)
+            continue;
+
+        ArrayListCursorBeforeHead(l);
+        while (ArrayListCursorHasNext(l) == true)
+        {
+            ArrayListCursorNext(l);
+
+            kv = ArrayListCursorGet(l);
+
+            ArrayListAdd(result, StringCopy(kv->key));
+        }
+    }
+
+    return result;
+}
+
+String DictionaryToStringInt(Dictionary d)
+{
+    ArrayList l;
+    size_t i, size;
+    String result, temp;
+    DictionaryKVP kv;
+
+    assert(d != NULL);
+
+    size = d->size;
+    result = StringCopy("[\n");
+
+    for (i = 0; i < size; i++)
+    {
+        l = d->data[i];
+
+        if (l == NULL)
+            continue;
+
+        ArrayListCursorBeforeHead(l);
+        while (ArrayListCursorHasNext(l) == true)
+        {
+            ArrayListCursorNext(l);
+
+            kv = ArrayListCursorGet(l);
+
+            temp = StringFormat("\t{\"%s\" : ", kv->key);
+            result = StringAdd(result, temp);
+            free(temp);
+
+            if (kv->data == NULL)
+                result = StringAdd(result, "NULL}\n");
+            else
+            {
+                temp = StringFormat("\"%d\"}\n", *(int *)kv->data);
+                result = StringAdd(result, temp);
+                free(temp);
+            }
+        }
+    }
+
+    result = StringAdd(result, "]");
+
+    return result;
+}
+
+String DictionaryToStringString(Dictionary d)
+{
+    ArrayList l;
+    size_t i, size;
+    String result, temp;
+    DictionaryKVP kv;
+
+    assert(d != NULL);
+
+    size = d->size;
+    result = StringCopy("[\n");
+
+    for (i = 0; i < size; i++)
+    {
+        l = d->data[i];
+
+        if (l == NULL)
+            continue;
+
+        ArrayListCursorBeforeHead(l);
+        while (ArrayListCursorHasNext(l) == true)
+        {
+            ArrayListCursorNext(l);
+
+            kv = ArrayListCursorGet(l);
+
+            temp = StringFormat("\t{\"%s\" : ", kv->key);
+            result = StringAdd(result, temp);
+            free(temp);
+
+            if (kv->data == NULL)
+                result = StringAdd(result, "NULL}\n");
+            else
+            {
+                temp = StringFormat("\"%s\"}\n", (String)kv->data);
+                result = StringAdd(result, temp);
+                free(temp);
+            }
+        }
+    }
+
+    result = StringAdd(result, "]");
+
+    return result;
+}
+
+void DictionaryPrintKeys(Dictionary d)
+{
+    ArrayList l;
+
+    assert(d != NULL);
+
+    l = DictionaryKeys(d);
+
+    ArrayListPrintString(l);
+
+    ArrayListFree(l);
+}
+
+void DictionaryPrintInt(Dictionary d)
+{
+    String s;
+
+    assert(d != NULL);
+
+    s = DictionaryToStringInt(d);
+    printf("%s\n", s);
+
+    free(s);
+}
+
+void DictionaryPrintString(Dictionary d)
+{
+    String s;
+
+    assert(d != NULL);
+
+    s = DictionaryToStringString(d);
+    printf("%s\n", s);
+
+    free(s);
+}

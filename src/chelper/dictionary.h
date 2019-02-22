@@ -61,6 +61,21 @@ bool DictionarySet(Dictionary d, String key, void *data);
 */
 ArrayList DictionaryKeys(Dictionary d);
 
+/*Returns a string of the dictionary parsed as ints*/
+String DictionaryToStringInt(Dictionary d);
+
+/*Returns a string of the dictionary parsed as strings*/
+String DictionaryToStringString(Dictionary d);
+
+/*Prints the dictionary values parsed as ints*/
+void DictionaryPrintInt(Dictionary d);
+
+/*Prints the dictionary values parsed as strings*/
+void DictionaryPrintString(Dictionary d);
+
+/*Prints the keys of the dictionary*/
+void DictionaryPrintKeys(Dictionary d);
+
 /*Free dict*/
 void FreeDictionary(void *d);
 
