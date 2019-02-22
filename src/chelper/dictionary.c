@@ -7,6 +7,7 @@
 #include "arraylist.h"
 #include "common.h"
 #include "internal/common.h"
+#include "internal/arraylist.h"
 #include "string.h"
 
 /*The key value pair*/
@@ -40,6 +41,8 @@ struct DictionaryKVP
 #define DictionaryMinSize 32
 /*The maximum load factor before expanding the array.*/
 #define DictionaryMaxLoadFactor 1.5
+/*The minimuum load factor before shrinking the array.*/
+#define DictionaryMinLoadFactor 1.5
 
 /*Creates the KVP*/
 DictionaryKVP DictionaryKVPCreate(Dictionary d, String key, void *data)
@@ -222,6 +225,7 @@ size_t DictionaryLength(Dictionary d)
     return d->length;
 }
 
+/*Returns a hashed array pos for the key*/
 size_t _DictionaryGetArrayPos(Dictionary d, String key)
 {
     assert(d != NULL);
@@ -230,6 +234,7 @@ size_t _DictionaryGetArrayPos(Dictionary d, String key)
     return StringHash(key) % d->size;
 }
 
+/*Returns an arraylist for the KVPs.*/
 ArrayList _DictionaryGetArrayList()
 {
     return ArrayListCreate(-1, &DictionaryKVPFree, &DictionaryKVPCopy);
@@ -272,10 +277,11 @@ void *DictionaryGet(Dictionary d, String key)
     return ArrayListCursorGet(l);
 }
 
+/*Resizes the dictionary.*/
 void _DictionaryResize(Dictionary d, size_t newSize)
 {
-    ArrayList *data, *oldData, l;
-    size_t i, oldSize;
+    ArrayList *data, *oldData, l, l2;
+    size_t i, oldSize, arrPos;
     DictionaryKVP kv;
 
     assert(d != NULL);
@@ -296,16 +302,38 @@ void _DictionaryResize(Dictionary d, size_t newSize)
         if (l == NULL)
             continue;
 
+        ArrayListClearFree(l);
+
         ArrayListCursorBeforeHead(l);
         while (ArrayListCursorHasNext(l) == true)
         {
             ArrayListCursorNext(l);
 
             kv = ArrayListCursorGet(l);
+
+            arrPos = _DictionaryGetArrayPos(d, kv->key);
+
+            l2 = d->data[arrPos];
+
+            if (l2 == NULL)
+            {
+                d->data[arrPos] = _DictionaryGetArrayList();
+                l2 = d->data[arrPos];
+            }
+
+            ArrayListAdd(l2, kv);
         }
 
         ArrayListFree(l);
     }
+}
+
+/*Returns the load factor of the dictionary*/
+double _DictionaryGetLoadFactor(Dictionary d)
+{
+    assert(d != NULL);
+
+    return (double)d->length / (double)d->size;
 }
 
 bool DictionaryRemove(Dictionary d, String key)
@@ -328,6 +356,12 @@ bool DictionaryRemove(Dictionary d, String key)
         return false;
 
     d->length--;
+
+    if (d->size > DictionaryMinSize && _DictionaryGetLoadFactor(d) < DictionaryMinLoadFactor)
+    {
+        _DictionaryResize(d, d->size / 2);
+    }
+
     return true;
 }
 
@@ -362,10 +396,13 @@ bool DictionarySet(Dictionary d, String key, void *data)
         return false;
 
     d->length++;
+
+    if (_DictionaryGetLoadFactor(d) > DictionaryMaxLoadFactor)
+    {
+        _DictionaryResize(d, d->size * 2);
+    }
+
     return true;
 }
 
-/*
-    Returns a list of the dict's keys.
-*/
 ArrayList DictionaryKeys(Dictionary d);

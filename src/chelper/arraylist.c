@@ -5,6 +5,7 @@
 #include "arraylist.h"
 #include "common.h"
 #include "internal/common.h"
+#include "internal/arraylist.h"
 #include "string.h"
 
 /*THe minimum size of arrays.*/
@@ -104,6 +105,13 @@ void _ArrayListFreeItem(ArrayList l, void *i)
         return;
 
     l->free_fn(i);
+}
+
+void ArrayListClearFree(ArrayList l)
+{
+    assert(l != NULL);
+
+    l->free_fn = NULL;
 }
 
 void ArrayListClear(ArrayList l)
