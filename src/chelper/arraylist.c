@@ -130,6 +130,16 @@ void ArrayListFree(ArrayList l)
     free(l);
 }
 
+void FreeArrayList(void *a)
+{
+    ArrayListFree((ArrayList)a);
+}
+
+void *CopyArrayList(void *a)
+{
+    return ArrayListCopy((ArrayList)a);
+}
+
 /*Resizes the array in the list to be the new size.*/
 void _ArrayListResize(ArrayList l, size_t newSize)
 {
@@ -273,7 +283,7 @@ bool ArrayListAddX(ArrayList l, void *a, size_t x)
 
     l->arr[x] = a;
 
-    if (x >= l->cursor)
+    if ((int)x >= l->cursor)
         l->cursor++;
 
     l->length++;
@@ -305,7 +315,7 @@ bool ArrayListRemoveX(ArrayList l, size_t x)
     for (i = x; i < len - 1; i++)
         l->arr[i] = l->arr[i + 1];
 
-    if (x >= l->cursor)
+    if ((int)x >= l->cursor)
         l->cursor--;
 
     l->length--;
@@ -631,7 +641,7 @@ bool ArrayListCursorNext(ArrayList l)
 {
     assert(l != NULL);
 
-    if (l->cursor >= ArrayListLength(l))
+    if (l->cursor >= (int)ArrayListLength(l))
     {
         SetErrorMessage("Cursor is at the end.");
         return false;
@@ -659,7 +669,7 @@ bool ArrayListCursorIsNull(ArrayList l)
 {
     assert(l != NULL);
 
-    if (l->cursor >= 0 && l->cursor < ArrayListLength(l))
+    if (l->cursor >= 0 && l->cursor < (int)ArrayListLength(l))
         return false;
 
     return true;
@@ -669,7 +679,7 @@ bool ArrayListCursorHasNext(ArrayList l)
 {
     assert(l != NULL);
 
-    if (l->cursor + 1 >= ArrayListLength(l))
+    if ((size_t)(l->cursor + 1) >= ArrayListLength(l))
         return false;
 
     return true;
@@ -735,14 +745,28 @@ bool ArrayListCursorSet(ArrayList l, void *data)
 
 bool ArrayListCursorAdd(ArrayList l, void *data)
 {
+    int index;
+
     assert(l != NULL);
 
-    return ArrayListAddX(l, data, l->cursor);
+    index = l->cursor;
+    if (index < 0)
+        index = 0;
+
+    return ArrayListAddX(l, data, index);
 }
 
-bool ArrayListCursorDelete(ArrayList l)
+bool ArrayListCursorRemove(ArrayList l)
+{
+    assert(l != NULL);
+    assert(ArrayListCursorIsNull(l) != true);
+
+    return ArrayListRemoveX(l, l->cursor);
+}
+
+int ArrayListCursorIndexOf(ArrayList l)
 {
     assert(l != NULL);
 
-    return ArrayListRemoveX(l, l->cursor);
+    return l->cursor;
 }

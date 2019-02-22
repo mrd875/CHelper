@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "../chelper/common.h"
 #include "../chelper/arraylist.h"
@@ -11,11 +12,13 @@ void fail(String src)
 {
     printf("%s\n", src);
 
-    exit(1);
+    assert(false);
 }
 
 void EnsureSize(ArrayList l, size_t expectSize)
 {
+    size_t i;
+
     if (expectSize > 0)
     {
         if (ArrayListIsEmpty(l))
@@ -31,6 +34,32 @@ void EnsureSize(ArrayList l, size_t expectSize)
     {
         fail("List was not expected size");
     }
+
+    i = 0;
+    ArrayListCursorBeforeHead(l);
+    while (ArrayListCursorHasNext(l))
+    {
+        i++;
+        ArrayListCursorNext(l);
+    }
+
+    if (i != expectSize)
+    {
+        fail("List cursor didn't iterator over expectedSize things.");
+    }
+
+    i = 0;
+    ArrayListCursorAfterTail(l);
+    while (ArrayListCursorHasPrevious(l))
+    {
+        i++;
+        ArrayListCursorPrevious(l);
+    }
+
+    if (i != expectSize)
+    {
+        fail("List cursor didn't iterator over expectedSize things.");
+    }
 }
 
 void EnsureContents(ArrayList l, String expect)
@@ -44,6 +73,33 @@ void EnsureContents(ArrayList l, String expect)
     for (i = 0; i < len; i++)
     {
         a = ArrayListGetX(l, i);
+
+        if (a == NULL)
+            is = StringAdd(is, "NULL ");
+        else
+        {
+            temp = StringFormat("%d ", *a);
+            is = StringAdd(is, temp);
+            free(temp);
+        }
+    }
+
+    if (strcmp(expect, is))
+    {
+        printf("%s\n\n%s\n\n", expect, is);
+        fail("Contents do not match!");
+    }
+
+    free(is);
+
+    is = StringCopy("");
+
+    ArrayListCursorBeforeHead(l);
+    while (ArrayListCursorHasNext(l))
+    {
+        ArrayListCursorNext(l);
+
+        a = ArrayListCursorGet(l);
 
         if (a == NULL)
             is = StringAdd(is, "NULL ");
@@ -233,6 +289,22 @@ int main(void)
     EnsureSize(l2, 6);
     EnsureContents(l2, "94 95 96 97 98 99 ");
     ArrayListFree(l2);
+
+    ArrayListCursorBeforeHead(l);
+    if (!ArrayListCursorSearchNext(l, &EqualInt, &i))
+    {
+        fail("Couldn't find i!");
+    }
+
+    if (ArrayListCursorIndexOf(l) != 94)
+    {
+        fail("Wrong index!");
+    }
+
+    if (ArrayListCursorSearchNext(l, &EqualInt, &i))
+    {
+        fail("shouldn't find i!");
+    }
 
     ArrayListFree(l);
 

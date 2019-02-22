@@ -171,13 +171,24 @@ void *ArrayListCursorGet(ArrayList l);
 bool ArrayListCursorSet(ArrayList l, void *data);
 
 /*
-    Adds item to ArrayList before the ArrayListCursor. Returns if the ArrayList iterator was successful.
+    Adds item to ArrayList before the ArrayListCursor. Cursor remains on the current element. Returns if the ArrayList iterator was successful.
 */
 bool ArrayListCursorAdd(ArrayList l, void *data);
 
 /*
-    Deletes the entry at ArrayListCursor and goes after. Returns if successful.
+    Deletes the entry at ArrayListCursor and goes before. Returns if successful.
 */
-bool ArrayListCursorDelete(ArrayList l);
+bool ArrayListCursorRemove(ArrayList l);
+
+/*
+    Returns the index of the current position of the cursor.
+*/
+int ArrayListCursorIndexOf(ArrayList l);
+
+/*Free list*/
+void FreeArrayList(void *a);
+
+/*Copy list*/
+void *CopyArrayList(void *a);
 
 #endif /* __CHELPERDICT__ */

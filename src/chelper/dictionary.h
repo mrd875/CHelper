@@ -2,12 +2,19 @@
 #define __CHELPERDICT__
 
 #include <stdbool.h>
+#include <stdlib.h>
+
+/* This is the array list struct. */
+typedef struct Dictionary *Dictionary;
+
 #include "common.h"
+#include "string.h"
+#include "arraylist.h"
 
 /*
     Creates a dict, make sure to free after.
 */
-Dictionary DictionaryCreate();
+Dictionary DictionaryCreate(free_fn_t free_fn, copy_fn_t copy_fn);
 
 /*
     Frees a dict.
@@ -25,14 +32,9 @@ void DictionaryClear(Dictionary d);
 Dictionary DictionaryCopy(Dictionary d);
 
 /*
-    Data args dictionary
-*/
-DataArgs DataArgsDictionary();
-
-/*
     Returns how many keys are in the dictionary.
 */
-int DictionarySize(Dictionary d);
+size_t DictionaryLength(Dictionary d);
 
 /*
     Returns if the dict has the key.
@@ -47,16 +49,16 @@ void *DictionaryGet(Dictionary d, String key);
 /*
     Removes the key from the dict. Returns if successful.
 */
-bool DictionaryDelete(Dictionary d, String key);
+bool DictionaryRemove(Dictionary d, String key);
 
 /*
     Sets the key to be the data.
 */
-bool DictionarySet(Dictionary d, String key, void *data, DataArgs dataArgs);
+bool DictionarySet(Dictionary d, String key, void *data);
 
 /*
     Returns a list of the dict's keys.
 */
-List DictionaryKeys(Dictionary d);
+ArrayList DictionaryKeys(Dictionary d);
 
 #endif /* __CHELPERDICT__ */

@@ -85,4 +85,7 @@ bool StringBeginsWith(String src, String what);
 /*Ends with str*/
 bool StringEndsWith(String src, String what);
 
+/*Hashes a string to a number*/
+unsigned long StringHash(String str);
+
 #endif /* __CHELPSTRING__ */
