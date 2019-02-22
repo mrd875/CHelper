@@ -61,4 +61,10 @@ bool DictionarySet(Dictionary d, String key, void *data);
 */
 ArrayList DictionaryKeys(Dictionary d);
 
+/*Free dict*/
+void FreeDictionary(void *d);
+
+/*Copy dict*/
+void *CopyDictionary(void *d);
+
 #endif /* __CHELPERDICT__ */

@@ -66,7 +66,9 @@ void *DictionaryKVPCopy(void *a)
 
     assert(a != NULL);
 
-    kvo = (DictionaryKVP *)a;
+    kvo = (DictionaryKVP)a;
+
+    assert(kvo->owner != NULL);
 
     data = NULL;
     if (kvo->owner->copy_fn != NULL)
@@ -85,6 +87,8 @@ void DictionaryKVPFree(void *a)
     assert(a != NULL);
 
     kv = (DictionaryKVP)a;
+
+    assert(kv->owner != NULL);
 
     if (kv->owner->free_fn != NULL)
         kv->owner->free_fn(kv->data);
@@ -105,7 +109,7 @@ bool DictionaryKVPKeyEqual(void *a, void *b)
     kv = (DictionaryKVP)a;
     key = (String)b;
 
-    if (strcmp(kv->key, key))
+    if (strcmp(kv->key, key) != 0)
         return false;
 
     return true;
@@ -142,18 +146,38 @@ void DictionaryFree(Dictionary d)
     free(d);
 }
 
+void FreeDictionary(void *d)
+{
+    assert(d != NULL);
+
+    DictionaryFree((Dictionary)d);
+}
+
+void *CopyDictionary(void *d)
+{
+    assert(d != NULL);
+
+    return DictionaryCopy((Dictionary)d);
+}
+
 void DictionaryClear(Dictionary d)
 {
-    size_t i;
+    size_t i, size;
+    ArrayList l;
 
     assert(d != NULL);
 
-    for (i = 0; i < d->size; i++)
+    size = d->size;
+
+    for (i = 0; i < size; i++)
     {
-        if (d->data[i] == NULL)
+        l = d->data[i];
+
+        if (l == NULL)
             continue;
 
-        ArrayListFree(d->data[i]);
+        ArrayListFree(l);
+
         d->data[i] = NULL;
     }
 }
@@ -161,27 +185,32 @@ void DictionaryClear(Dictionary d)
 Dictionary DictionaryCopy(Dictionary d)
 {
     Dictionary a;
-    size_t i;
-    ArrayList *data;
+    size_t i, size;
+    ArrayList *data, l;
 
     assert(d != NULL);
+
+    size = d->size;
 
     a = DictionaryCreate(d->free_fn, d->copy_fn);
     free(a->data);
 
-    data = calloc(sizeof(ArrayList *), d->size);
+    data = calloc(sizeof(ArrayList *), size);
     assert(data != NULL);
 
-    for (i = 0; i < d->size; i++)
+    for (i = 0; i < size; i++)
     {
-        if (d->data[i] == NULL)
+        l = d->data[i];
+
+        if (l == NULL)
             continue;
 
-        data[i] = ArrayListCopy(d->data[i]);
+        data[i] = ArrayListCopy(l);
     }
 
     a->data = data;
-    a->size = d->size;
+    a->size = size;
+    a->length = d->length;
 
     return a;
 }
@@ -199,6 +228,11 @@ size_t _DictionaryGetArrayPos(Dictionary d, String key)
     assert(key != NULL);
 
     return StringHash(key) % d->size;
+}
+
+ArrayList _DictionaryGetArrayList()
+{
+    return ArrayListCreate(-1, &DictionaryKVPFree, &DictionaryKVPCopy);
 }
 
 bool DictionaryHas(Dictionary d, String key)
@@ -238,6 +272,42 @@ void *DictionaryGet(Dictionary d, String key)
     return ArrayListCursorGet(l);
 }
 
+void _DictionaryResize(Dictionary d, size_t newSize)
+{
+    ArrayList *data, *oldData, l;
+    size_t i, oldSize;
+    DictionaryKVP kv;
+
+    assert(d != NULL);
+    assert(newSize > 0);
+
+    data = calloc(sizeof(ArrayList *), newSize);
+    assert(data != NULL);
+
+    oldData = d->data;
+    oldSize = d->size;
+    d->data = data;
+    d->size = newSize;
+
+    for (i = 0; i < oldSize; i++)
+    {
+        l = oldData[i];
+
+        if (l == NULL)
+            continue;
+
+        ArrayListCursorBeforeHead(l);
+        while (ArrayListCursorHasNext(l) == true)
+        {
+            ArrayListCursorNext(l);
+
+            kv = ArrayListCursorGet(l);
+        }
+
+        ArrayListFree(l);
+    }
+}
+
 bool DictionaryRemove(Dictionary d, String key)
 {
     ArrayList l;
@@ -254,13 +324,46 @@ bool DictionaryRemove(Dictionary d, String key)
     if (ArrayListCursorSearchNext(l, &DictionaryKVPKeyEqual, key) == false)
         return false;
 
-    return ArrayListCursorRemove(l);
+    if (ArrayListCursorRemove(l) != true)
+        return false;
+
+    d->length--;
+    return true;
 }
 
-/*
-    Sets the key to be the data.
-*/
-bool DictionarySet(Dictionary d, String key, void *data);
+bool DictionarySet(Dictionary d, String key, void *data)
+{
+    ArrayList l;
+    size_t arrPos;
+
+    assert(d != NULL);
+    assert(key != NULL);
+
+    arrPos = _DictionaryGetArrayPos(d, key);
+
+    l = d->data[arrPos];
+
+    if (l == NULL)
+    {
+        d->data[arrPos] = _DictionaryGetArrayList();
+        l = d->data[arrPos];
+    }
+
+    ArrayListCursorBeforeHead(l);
+    if (ArrayListCursorSearchNext(l, &DictionaryKVPKeyEqual, key) == true)
+    {
+        if (ArrayListCursorRemove(l) == false)
+            return false;
+
+        d->length--;
+    }
+
+    if (ArrayListAdd(l, DictionaryKVPCreate(d, key, data)) != true)
+        return false;
+
+    d->length++;
+    return true;
+}
 
 /*
     Returns a list of the dict's keys.
