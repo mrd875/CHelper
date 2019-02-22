@@ -30,6 +30,11 @@ int main(void)
         fail("Begins with failed.");
     }
 
+    if (StringBeginsWith("hello there guys", "there "))
+    {
+        fail("Begins with failed.");
+    }
+
     if (!StringEndsWith("hello there guys", "guys"))
     {
         fail("Ends with failed.");

@@ -115,4 +115,69 @@ String ArrayListToStringString(ArrayList l);
 /*Prints the list as strings.*/
 void ArrayListPrintString(ArrayList l);
 
+/*
+    ArrayList cursor goes to just before the head in the ArrayList. Returns if successful.
+*/
+bool ArrayListCursorBeforeHead(ArrayList l);
+
+/*
+    ArrayList cursor goes to just after the tail in the ArrayList. Returns if successful.
+*/
+bool ArrayListCursorAfterTail(ArrayList l);
+
+/*
+    ArrayList cursor goes to next thing in the ArrayList. Returns if successful.
+*/
+bool ArrayListCursorNext(ArrayList l);
+
+/*
+    ArrayList iterator goes to next thing in the ArrayList. Returns if successful.
+*/
+bool ArrayListCursorPrevious(ArrayList l);
+
+/*
+    Returns if the iterator is on a null spot of the ArrayList (edges).
+*/
+bool ArrayListCursorIsNull(ArrayList l);
+
+/*
+    ArrayList iterator goes to next element that is true for the search. Returns if it was successful.
+*/
+bool ArrayListCursorSearchNext(ArrayList l, compare_fn_t compare_fn, void *compare_arg);
+
+/*
+    ArrayList iterator goes to before element that is true for the search. Returns if it was successful.
+*/
+bool ArrayListCursorSearchPrevious(ArrayList l, compare_fn_t compare_fn, void *compare_arg);
+
+/*
+    Returns if the ArrayList iterator has next.
+*/
+bool ArrayListCursorHasNext(ArrayList l);
+
+/*
+    Returns if the ArrayList iterator has before.
+*/
+bool ArrayListCursorHasPrevious(ArrayList l);
+
+/*
+    Returns the data at the ArrayListCursor.
+*/
+void *ArrayListCursorGet(ArrayList l);
+
+/*
+    Changes the ArrayListCursor's data. Returns if successful.
+*/
+bool ArrayListCursorSet(ArrayList l, void *data);
+
+/*
+    Adds item to ArrayList before the ArrayListCursor. Returns if the ArrayList iterator was successful.
+*/
+bool ArrayListCursorAdd(ArrayList l, void *data);
+
+/*
+    Deletes the entry at ArrayListCursor and goes after. Returns if successful.
+*/
+bool ArrayListCursorDelete(ArrayList l);
+
 #endif /* __CHELPERDICT__ */

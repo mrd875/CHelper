@@ -25,6 +25,8 @@ struct ArrayList
     free_fn_t free_fn;
     /* The function to copy the data. */
     copy_fn_t copy_fn;
+    /*For cursors, current index that the cursor is on*/
+    int cursor;
 };
 
 ArrayList ArrayListCreate(size_t capacity, free_fn_t free_fn, copy_fn_t copy_fn)
@@ -48,6 +50,7 @@ ArrayList ArrayListCreate(size_t capacity, free_fn_t free_fn, copy_fn_t copy_fn)
 
     l->arr = arr;
     l->size = startSize;
+    l->cursor = -1;
 
     return l;
 }
@@ -84,6 +87,8 @@ ArrayList ArrayListCopy(ArrayList l)
         assert(o == true);
     }
 
+    l2->cursor = l->cursor;
+
     return l2;
 }
 
@@ -113,6 +118,7 @@ void ArrayListClear(ArrayList l)
         _ArrayListFreeItem(l, l->arr[i]);
 
     l->length = 0;
+    l->cursor = -1;
 }
 
 void ArrayListFree(ArrayList l)
@@ -267,6 +273,9 @@ bool ArrayListAddX(ArrayList l, void *a, size_t x)
 
     l->arr[x] = a;
 
+    if (x >= l->cursor)
+        l->cursor++;
+
     l->length++;
     return true;
 }
@@ -295,6 +304,9 @@ bool ArrayListRemoveX(ArrayList l, size_t x)
 
     for (i = x; i < len - 1; i++)
         l->arr[i] = l->arr[i + 1];
+
+    if (x >= l->cursor)
+        l->cursor--;
 
     l->length--;
 
@@ -595,4 +607,142 @@ void ArrayListPrintString(ArrayList l)
     printf("%s\n", temp);
 
     free(temp);
+}
+
+bool ArrayListCursorBeforeHead(ArrayList l)
+{
+    assert(l != NULL);
+
+    l->cursor = -1;
+
+    return true;
+}
+
+bool ArrayListCursorAfterTail(ArrayList l)
+{
+    assert(l != NULL);
+
+    l->cursor = ArrayListLength(l);
+
+    return true;
+}
+
+bool ArrayListCursorNext(ArrayList l)
+{
+    assert(l != NULL);
+
+    if (l->cursor >= ArrayListLength(l))
+    {
+        SetErrorMessage("Cursor is at the end.");
+        return false;
+    }
+
+    l->cursor++;
+    return true;
+}
+
+bool ArrayListCursorPrevious(ArrayList l)
+{
+    assert(l != NULL);
+
+    if (l->cursor < 0)
+    {
+        SetErrorMessage("Cursor is at the beginning.");
+        return false;
+    }
+
+    l->cursor--;
+    return true;
+}
+
+bool ArrayListCursorIsNull(ArrayList l)
+{
+    assert(l != NULL);
+
+    if (l->cursor >= 0 && l->cursor < ArrayListLength(l))
+        return false;
+
+    return true;
+}
+
+bool ArrayListCursorHasNext(ArrayList l)
+{
+    assert(l != NULL);
+
+    if (l->cursor + 1 >= ArrayListLength(l))
+        return false;
+
+    return true;
+}
+
+bool ArrayListCursorHasPrevious(ArrayList l)
+{
+    assert(l != NULL);
+
+    if (l->cursor - 1 < 0)
+        return false;
+
+    return true;
+}
+
+bool ArrayListCursorSearchNext(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    while (ArrayListCursorHasNext(l) == true)
+    {
+        ArrayListCursorNext(l);
+
+        if (compare_fn(ArrayListCursorGet(l), compare_arg) == true)
+            return true;
+    }
+
+    return false;
+}
+
+bool ArrayListCursorSearchPrevious(ArrayList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    while (ArrayListCursorHasPrevious(l) == true)
+    {
+        ArrayListCursorPrevious(l);
+
+        if (compare_fn(ArrayListCursorGet(l), compare_arg) == true)
+            return true;
+    }
+
+    return false;
+}
+
+void *ArrayListCursorGet(ArrayList l)
+{
+    assert(l != NULL);
+    assert(ArrayListCursorIsNull(l) != true);
+
+    return l->arr[l->cursor];
+}
+
+bool ArrayListCursorSet(ArrayList l, void *data)
+{
+    assert(l != NULL);
+    assert(ArrayListCursorIsNull(l) != true);
+
+    return ArrayListSetX(l, data, l->cursor);
+}
+
+bool ArrayListCursorAdd(ArrayList l, void *data)
+{
+    assert(l != NULL);
+
+    return ArrayListAddX(l, data, l->cursor);
+}
+
+bool ArrayListCursorDelete(ArrayList l)
+{
+    assert(l != NULL);
+
+    return ArrayListRemoveX(l, l->cursor);
 }
