@@ -192,6 +192,26 @@ LinkedList LinkedListCreate(size_t capacity, free_fn_t free_fn, copy_fn_t copy_f
     return l;
 }
 
+LinkedList LinkedListCopy(LinkedList l)
+{
+    LinkedList result;
+    LinkedListNode ln;
+    void *data;
+
+    assert(l != NULL);
+
+    result = LinkedListCreate(l->capacity, l->free_fn, l->copy_fn);
+
+    for (ln = l->head; ln != NULL; ln = ln->next)
+    {
+        data = LinkedListNodeCopyData(ln);
+
+        LinkedListAdd(result, data);
+    }
+
+    return result;
+}
+
 void LinkedListFree(LinkedList l)
 {
     assert(l != NULL);
@@ -556,7 +576,7 @@ bool LinkedListNodeRemove(LinkedListNode ln)
     l->length--;
 
     if (ln == l->cursor.current)
-        _LinkedListCursorSetTo(l, next);
+        _LinkedListCursorSetTo(l, prev);
     else
         _LinkedListCursorUpdate(l);
 
@@ -596,7 +616,7 @@ bool LinkedListRemoveFirst(LinkedList l)
     l->length--;
 
     if (head == l->cursor.current)
-        _LinkedListCursorSetTo(l, next);
+        _LinkedListCursorSetTo(l, NULL);
     else
         _LinkedListCursorUpdate(l);
 
@@ -633,7 +653,7 @@ bool LinkedListRemove(LinkedList l)
     l->length--;
 
     if (tail == l->cursor.current)
-        _LinkedListCursorSetTo(l, NULL);
+        _LinkedListCursorSetTo(l, prev);
     else
         _LinkedListCursorUpdate(l);
 
@@ -671,24 +691,48 @@ bool LinkedListRemoveX(LinkedList l, size_t x)
     return LinkedListNodeRemove(ln);
 }
 
-LinkedList LinkedListCopy(LinkedList l)
+LinkedList LinkedListConcat(LinkedList l, LinkedList l2)
 {
-    LinkedList result;
-    LinkedListNode ln;
-    void *data;
+    LinkedList answer;
+    bool o;
+    assert(l != NULL);
+    assert(l2 != NULL);
 
+    answer = LinkedListCopy(l);
+    answer->capacity = 0;
+
+    o = LinkedListAddAll(answer, l2);
+
+    assert(o == true);
+
+    return answer;
+}
+
+LinkedList LinkedListGetSubLinkedList(LinkedList l, size_t i, size_t size)
+{
+    LinkedList answer;
     assert(l != NULL);
 
-    result = LinkedListCreate(l->capacity, l->free_fn, l->copy_fn);
+    answer = LinkedListCopy(l);
+    answer->capacity = 0;
 
-    for (ln = l->head; ln != NULL; ln = ln->next)
-    {
-        data = LinkedListNodeCopyData(ln);
+    LinkedListTrim(answer, i, size);
 
-        LinkedListAdd(result, data);
-    }
+    return answer;
+}
 
-    return result;
+LinkedList LinkedListFilter(LinkedList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    LinkedList answer;
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    answer = LinkedListCopy(l);
+    answer->capacity = 0;
+
+    LinkedListRemoveIf(answer, compare_fn, compare_arg);
+
+    return answer;
 }
 
 int LinkedListIndexOf(LinkedList l, compare_fn_t compare_fn, void *compare_arg)
@@ -756,96 +800,82 @@ void LinkedListForEach(LinkedList l, foreach_fn_t foreach_fn)
     }
 }
 
-/* bool LinkedListConcat(LinkedList the_LinkedList, LinkedList two_LinkedList)
+bool LinkedListRemoveIf(LinkedList l, compare_fn_t compare_fn, void *compare_arg)
 {
-    LinkedListNode two_head, two_tail, LinkedList_tail;
+    int i;
+    bool o;
 
-    assert(the_LinkedList != NULL);
-    assert(two_LinkedList != NULL);
+    assert(l != NULL);
+    assert(compare_fn != NULL);
 
-    two_head = two_LinkedList->head;
-    two_tail = two_LinkedList->tail;
-    LinkedList_tail = the_LinkedList->tail;
-
-    the_LinkedList->size += two_LinkedList->size;
-
-    two_LinkedList->head = NULL;
-    LinkedListClear(two_LinkedList);
-    _LinkedListCursorClear(the_LinkedList);
-
-    if (two_head == NULL)
-        return true;
-
-    if (LinkedList_tail == NULL)
+    while ((i = LinkedListIndexOf(l, compare_fn, compare_arg)) != -1)
     {
-        the_LinkedList->head = two_head;
-        the_LinkedList->tail = two_tail;
+        o = LinkedListRemoveX(l, i);
 
-        return true;
+        assert(o == true);
     }
-
-    LinkedList_tail->next = two_head;
-    two_head->previous = LinkedList_tail;
 
     return true;
 }
 
-LinkedList LinkedListGetSubLinkedList(LinkedList l, int i, int size)
+bool LinkedListAddAll(LinkedList l, LinkedList l2)
 {
-    LinkedList result;
     LinkedListNode ln;
-    int x;
+    bool o;
     void *data;
-    DataArgs dataArgs;
 
     assert(l != NULL);
-    assert(i >= 0);
-    assert(i < LinkedListSize(l));
+    assert(l2 != NULL);
 
-    result = LinkedListCreate(-1);
-
-    for (x = 0, ln = l->head; x < i && ln != NULL; x++, ln = ln->next)
-        ;
-
-    for (x = 0; x < size && ln != NULL; x++, ln = ln->next)
+    for (ln = l2->head; ln != NULL; ln = ln->next)
     {
         data = LinkedListNodeCopyData(ln);
-        dataArgs.copy_routine = ln->copy_routine;
-        dataArgs.free_routine = ln->free_routine;
-        dataArgs.size = ln->size;
 
-        LinkedListAddLast(result, data, dataArgs);
+        o = LinkedListAdd(l, data);
+
+        if (o == false)
+            return false;
     }
 
-    return result;
+    return true;
 }
 
-void LinkedListForEach(LinkedList l, void (*func)(void *, int i))
+bool LinkedListRemoveRange(LinkedList l, size_t i, size_t size)
 {
-    LinkedListNode ln;
-    int i;
-
+    size_t ii;
+    bool o;
     assert(l != NULL);
-    assert(func != NULL);
 
-    for (ln = l->head, i = 0; ln != NULL; ln = ln->next, i++)
+    for (ii = 0; ii < size; ii++)
     {
-        (*func)(ln->data, i);
+        o = LinkedListRemoveX(l, i);
+
+        if (o == false)
+            return false;
     }
+
+    return true;
 }
 
-void LinkedListFilter(LinkedList l, bool (*comparator)(void *, void *), void *comparisonArg)
+bool LinkedListTrim(LinkedList l, size_t i, size_t size)
 {
-    int i;
-
+    size_t ii;
+    bool o;
     assert(l != NULL);
-    assert(comparator != NULL);
 
-    while ((i = LinkedListSearch(l, comparator, comparisonArg)) > -1)
+    while (LinkedListRemoveX(l, i + size) == true)
+        ;
+
+    for (ii = 0; ii < i; ii++)
     {
-        LinkedListDeleteX(l, i);
+        o = LinkedListRemoveX(l, 0);
+
+        if (o == false)
+            return false;
     }
-}*/
+
+    return true;
+}
 
 void FreeLinkedList(void *a)
 {
@@ -1132,4 +1162,20 @@ bool LinkedListCursorRemove(LinkedList l)
         return LinkedListRemove(l);
 
     return LinkedListNodeRemove(l->cursor.current);
+}
+
+int LinkedListCursorIndexOf(LinkedList l)
+{
+    int i;
+    LinkedListNode ln;
+
+    assert(l != NULL);
+
+    for (i = 0, ln = l->head; ln != NULL; i++, ln = ln->next)
+    {
+        if (ln == l->cursor.current)
+            return i;
+    }
+
+    return -1;
 }
