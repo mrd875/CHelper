@@ -355,6 +355,13 @@ void *ArrayListGet(ArrayList l)
     return ArrayListGetX(l, ArrayListLength(l) - 1);
 }
 
+bool ArrayListSet(ArrayList l, void *data)
+{
+    assert(l != NULL);
+
+    return ArrayListSetX(l, data, ArrayListLength(l) - 1);
+}
+
 ArrayList ArrayListConcat(ArrayList l, ArrayList l2)
 {
     ArrayList answer;

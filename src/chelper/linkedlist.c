@@ -19,37 +19,28 @@ struct LinkedListNode
 {
     /* The node that is before this one. */
     LinkedListNode previous;
-
     /* The node that is after this one. */
     LinkedListNode next;
-
     /* The address to the data. */
     void *data;
-
-    /* The function to free the data. */
-    void (*free_routine)(void *data);
-
-    /* The function to copy the data. */
-    void *(*copy_routine)(void *data);
-
-    /* Size of the data */
-    int size;
+    /*Owner*/
+    LinkedList owner;
 };
 
 struct LinkedList
 {
     /* The head node. */
     LinkedListNode head;
-
     /* The tail node */
     LinkedListNode tail;
-
+    /* The function pointer to free data */
+    free_fn_t free_fn;
+    /* The function pointer to copy data */
+    copy_fn_t copy_fn;
     /* The size */
-    int size;
-
+    size_t length;
     /* The cap of the LinkedList */
-    int capacity;
-
+    size_t capacity;
     /* The cursor. */
     struct
     {
@@ -64,7 +55,7 @@ struct LinkedList
 /*
     Updates the cursor.
 */
-void LinkedListCursorUpdate(LinkedList l)
+void _LinkedListCursorUpdate(LinkedList l)
 {
     assert(l != NULL);
 
@@ -87,7 +78,7 @@ void LinkedListCursorUpdate(LinkedList l)
 /*
     Clears the LinkedList iter
 */
-void LinkedListCursorClear(LinkedList l)
+void _LinkedListCursorClear(LinkedList l)
 {
     assert(l != NULL);
 
@@ -98,7 +89,7 @@ void LinkedListCursorClear(LinkedList l)
 /*
     Sets the cursor.
 */
-void LinkedListCursorSetTo(LinkedList l, LinkedListNode ln)
+void _LinkedListCursorSetTo(LinkedList l, LinkedListNode ln)
 {
     assert(l != NULL);
 
@@ -120,7 +111,7 @@ void LinkedListCursorSetTo(LinkedList l, LinkedListNode ln)
 /*
     Creates a LinkedList node for the LinkedList.
 */
-LinkedListNode LinkedListNodeCreate()
+LinkedListNode LinkedListNodeCreate(LinkedList l)
 {
     LinkedListNode ln;
 
@@ -129,12 +120,10 @@ LinkedListNode LinkedListNodeCreate()
     ln = malloc(sizeof(struct LinkedListNode));
     assert(ln != NULL);
 
-    ln->copy_routine = NULL;
-    ln->free_routine = NULL;
     ln->data = NULL;
     ln->next = NULL;
     ln->previous = NULL;
-    ln->size = 0;
+    ln->owner = l;
 
     return ln;
 }
@@ -145,11 +134,12 @@ LinkedListNode LinkedListNodeCreate()
 void LinkedListNodeFreeData(LinkedListNode ln)
 {
     assert(ln != NULL);
+    assert(ln->owner != NULL);
 
     debugp("freeing LinkedList node data");
 
-    if (ln->free_routine != NULL)
-        ln->free_routine(ln->data);
+    if (ln->owner->free_fn != NULL)
+        ln->owner->free_fn(ln->data);
 }
 
 /*
@@ -158,13 +148,14 @@ void LinkedListNodeFreeData(LinkedListNode ln)
 void *LinkedListNodeCopyData(LinkedListNode ln)
 {
     assert(ln != NULL);
+    assert(ln->owner != NULL);
 
     debugp("copying a LinkedList node data");
 
-    if (ln->copy_routine == NULL)
+    if (ln->owner->copy_fn == NULL)
         return NULL;
 
-    return ln->copy_routine(ln->data);
+    return ln->owner->copy_fn(ln->data);
 }
 
 /*
@@ -181,7 +172,7 @@ void LinkedListNodeFree(LinkedListNode ln)
     free(ln);
 }
 
-LinkedList LinkedListCreate(int size)
+LinkedList LinkedListCreate(size_t capacity, free_fn_t free_fn, copy_fn_t copy_fn)
 {
     LinkedList l;
 
@@ -190,11 +181,13 @@ LinkedList LinkedListCreate(int size)
     l = malloc(sizeof(struct LinkedList));
     assert(l != NULL);
 
-    l->capacity = size;
-    l->size = 0;
+    l->capacity = capacity;
+    l->length = 0;
     l->tail = NULL;
     l->head = NULL;
-    LinkedListCursorClear(l);
+    l->copy_fn = copy_fn;
+    l->free_fn = free_fn;
+    _LinkedListCursorClear(l);
 
     return l;
 }
@@ -228,22 +221,22 @@ void LinkedListClear(LinkedList l)
         ln = next;
     }
 
-    LinkedListCursorClear(l);
-    l->size = 0;
+    _LinkedListCursorClear(l);
+    l->length = 0;
     l->head = NULL;
     l->tail = NULL;
 }
 
-int LinkedListSize(LinkedList l)
+size_t LinkedListLength(LinkedList l)
 {
     assert(l != NULL);
 
     debugp("Getting LinkedList size");
 
-    return l->size;
+    return l->length;
 }
 
-int LinkedListCapacity(LinkedList l)
+size_t LinkedListCapacity(LinkedList l)
 {
     assert(l != NULL);
 
@@ -252,54 +245,106 @@ int LinkedListCapacity(LinkedList l)
     return l->capacity;
 }
 
-bool LinkedListFull(LinkedList l)
+bool LinkedListIsFull(LinkedList l)
 {
-    int size;
+    size_t cap;
 
     assert(l != NULL);
 
     debugp("Checking if full");
 
-    size = LinkedListSize(l);
+    cap = LinkedListCapacity(l);
 
-    if (size < 0)
+    if (cap == 0)
         return false;
 
-    if (LinkedListCapacity(l) < size)
+    if (LinkedListLength(l) < cap)
         return false;
 
     return true;
 }
 
-bool LinkedListEmpty(LinkedList l)
+bool LinkedListIsEmpty(LinkedList l)
 {
     assert(l != NULL);
 
     debugp("Checking if empty");
 
-    if (LinkedListSize(l) > 0)
+    if (LinkedListLength(l) > 0)
         return false;
 
     return true;
 }
 
-void *LinkedListGetFirst(LinkedList l)
+bool LinkedListSetCapacity(LinkedList l, size_t size)
+{
+    assert(l != NULL);
+
+    if (size != 0 && size < LinkedListLength(l))
+    {
+        SetErrorMessage("Set capacity below the length of list");
+        return false;
+    }
+
+    l->capacity = size;
+    return true;
+}
+
+/*
+    Changes the data at the node.
+*/
+bool LinkedListNodeSet(LinkedListNode ln, void *data)
+{
+    assert(ln != NULL);
+
+    if (ln->data != NULL)
+        LinkedListNodeFreeData(ln);
+
+    ln->data = data;
+    return true;
+}
+
+bool LinkedListSetX(LinkedList l, void *data, size_t x)
+{
+    size_t i;
+    LinkedListNode ln;
+
+    assert(l != NULL);
+
+    if (x >= LinkedListLength(l))
+    {
+        SetErrorMessage("Index out of bounds");
+        return false;
+    }
+
+    ln = l->head;
+    for (i = 0; i < x && ln != NULL; i++)
+    {
+        ln = ln->next;
+    }
+
+    assert(ln != NULL);
+    return LinkedListNodeSet(ln, data);
+}
+
+bool LinkedListSet(LinkedList l, void *data)
 {
     LinkedListNode ln;
 
     assert(l != NULL);
 
-    debugp("Getting head LinkedList data");
-
-    ln = l->head;
+    ln = l->tail;
 
     if (ln == NULL)
-        return NULL;
+    {
+        SetErrorMessage("Index out of bounds");
+        return false;
+    }
 
-    return ln->data;
+    return LinkedListNodeSet(ln, data);
 }
 
-void *LinkedListGetLast(LinkedList l)
+void *LinkedListGet(LinkedList l)
 {
     LinkedListNode ln;
 
@@ -310,18 +355,26 @@ void *LinkedListGetLast(LinkedList l)
     ln = l->tail;
 
     if (ln == NULL)
+    {
+        SetErrorMessage("Get from empty list");
         return NULL;
+    }
 
     return ln->data;
 }
 
-void *LinkedListGetX(LinkedList l, int x)
+void *LinkedListGetX(LinkedList l, size_t x)
 {
     LinkedListNode ln;
-    int i;
+    size_t i;
 
     assert(l != NULL);
-    assert(x >= 0);
+
+    if (x >= LinkedListLength(l))
+    {
+        SetErrorMessage("Index out of bounds");
+        return NULL;
+    }
 
     debugp("Getting x %d LinkedList data", x);
 
@@ -331,49 +384,36 @@ void *LinkedListGetX(LinkedList l, int x)
         ln = ln->next;
     }
 
-    if (ln == NULL)
-        return NULL;
+    assert(ln != NULL);
 
     return ln->data;
 }
 
 /*
-    Changes the data at the node.
-*/
-bool LinkedListNodeChange(LinkedListNode ln, void *data, DataArgs dataArgs)
-{
-    assert(ln != NULL);
-
-    if (ln->data != NULL)
-        LinkedListNodeFreeData(ln);
-
-    ln->data = data;
-
-    ln->free_routine = dataArgs.free_routine;
-    ln->copy_routine = dataArgs.copy_routine;
-    ln->size = dataArgs.size;
-    return true;
-}
-
-/*
     Adds the data to the LinkedList at the node. This is NOT for the edges case of insertion but only for inserting when the LinkedListnode has prev.
 */
-bool LinkedListNodeAdd(LinkedList l, LinkedListNode ln, void *data, DataArgs dataArgs)
+bool LinkedListNodeAdd(LinkedListNode ln, void *data)
 {
     LinkedListNode newNode, prev;
+    LinkedList l;
 
     assert(ln != NULL);
-    assert(l != NULL);
     assert(ln->previous != NULL);
+    assert(ln->owner != NULL);
 
-    if (LinkedListFull(l) == true)
+    l = ln->owner;
+
+    if (LinkedListIsFull(l) == true)
+    {
+        SetErrorMessage("Adding to a full list.");
         return false;
+    }
 
     prev = ln->previous;
 
-    newNode = LinkedListNodeCreate();
+    newNode = LinkedListNodeCreate(l);
 
-    if (LinkedListNodeChange(newNode, data, dataArgs) == false)
+    if (LinkedListNodeSet(newNode, data) == false)
         return false;
 
     prev->next = newNode;
@@ -382,24 +422,28 @@ bool LinkedListNodeAdd(LinkedList l, LinkedListNode ln, void *data, DataArgs dat
     newNode->next = ln;
     ln->previous = newNode;
 
-    l->size++;
-    LinkedListCursorUpdate(l);
+    l->length++;
+    _LinkedListCursorUpdate(l);
 
     return true;
 }
 
-bool LinkedListAddFirst(LinkedList l, void *data, DataArgs dataArgs)
+/*Adds to the head of the list*/
+bool LinkedListAddFirst(LinkedList l, void *data)
 {
     LinkedListNode head, newNode;
 
     assert(l != NULL);
 
-    if (LinkedListFull(l) == true)
+    if (LinkedListIsFull(l) == true)
+    {
+        SetErrorMessage("Adding to a full list.");
         return false;
+    }
 
     newNode = LinkedListNodeCreate(l);
 
-    if (LinkedListNodeChange(newNode, data, dataArgs) == false)
+    if (LinkedListNodeSet(newNode, data) == false)
         return false;
 
     head = l->head;
@@ -412,24 +456,27 @@ bool LinkedListAddFirst(LinkedList l, void *data, DataArgs dataArgs)
     else
         head->previous = newNode;
 
-    l->size++;
-    LinkedListCursorUpdate(l);
+    l->length++;
+    _LinkedListCursorUpdate(l);
 
     return true;
 }
 
-bool LinkedListAddLast(LinkedList l, void *data, DataArgs dataArgs)
+bool LinkedListAdd(LinkedList l, void *data)
 {
     LinkedListNode tail, newNode;
 
     assert(l != NULL);
 
-    if (LinkedListFull(l) == true)
+    if (LinkedListIsFull(l) == true)
+    {
+        SetErrorMessage("Adding to a full list.");
         return false;
+    }
 
     newNode = LinkedListNodeCreate(l);
 
-    if (LinkedListNodeChange(newNode, data, dataArgs) == false)
+    if (LinkedListNodeSet(newNode, data) == false)
         return false;
 
     tail = l->tail;
@@ -442,29 +489,32 @@ bool LinkedListAddLast(LinkedList l, void *data, DataArgs dataArgs)
     else
         tail->next = newNode;
 
-    l->size++;
-    LinkedListCursorUpdate(l);
+    l->length++;
+    _LinkedListCursorUpdate(l);
 
     return true;
 }
 
-bool LinkedListAddX(LinkedList l, void *data, DataArgs dataArgs, int x)
+bool LinkedListAddX(LinkedList l, void *data, size_t x)
 {
-    int i;
+    size_t i;
     LinkedListNode ln;
 
     assert(l != NULL);
-    assert(x >= 0);
 
-    i = LinkedListSize(l);
+    i = LinkedListLength(l);
 
-    assert(x <= i);
+    if (x > i)
+    {
+        SetErrorMessage("Index out of bounds");
+        return false;
+    }
 
     if (x == 0)
-        return LinkedListAddFirst(l, data, dataArgs);
+        return LinkedListAddFirst(l, data);
 
     if (x == i)
-        return LinkedListAddLast(l, data, dataArgs);
+        return LinkedListAdd(l, data);
 
     ln = l->head;
     for (i = 0; i < x && ln != NULL; i++)
@@ -473,40 +523,29 @@ bool LinkedListAddX(LinkedList l, void *data, DataArgs dataArgs, int x)
     }
 
     assert(ln != NULL);
-    return LinkedListNodeAdd(l, ln, data, dataArgs);
-}
-
-bool LinkedListChangeX(LinkedList l, void *data, DataArgs dataArgs, int x)
-{
-    int i;
-    LinkedListNode ln;
-
-    assert(l != NULL);
-    assert(x >= 0);
-    assert(x < LinkedListSize(l));
-
-    ln = l->head;
-    for (i = 0; i < x && ln != NULL; i++)
-    {
-        ln = ln->next;
-    }
-
-    assert(ln != NULL);
-    return LinkedListNodeChange(ln, data, dataArgs);
+    return LinkedListNodeAdd(ln, data);
 }
 
 /*
     Deletes the node. This is not for edges cases but when the node has a next and prev.
 */
-bool LinkedListNodeDelete(LinkedList l, LinkedListNode ln)
+bool LinkedListNodeRemove(LinkedListNode ln)
 {
     LinkedListNode prev, next;
+    LinkedList l;
 
     assert(ln != NULL);
     assert(ln->next != NULL);
     assert(ln->previous != NULL);
+    assert(ln->owner != NULL);
 
-    assert(LinkedListEmpty(l) == false);
+    l = ln->owner;
+
+    if (LinkedListIsEmpty(l) == true)
+    {
+        SetErrorMessage("Delete from empty list.");
+        return false;
+    }
 
     prev = ln->previous;
     next = ln->next;
@@ -514,26 +553,30 @@ bool LinkedListNodeDelete(LinkedList l, LinkedListNode ln)
     prev->next = next;
     next->previous = prev;
 
-    l->size--;
+    l->length--;
 
     if (ln == l->cursor.current)
-        LinkedListCursorSetTo(l, next);
+        _LinkedListCursorSetTo(l, next);
     else
-        LinkedListCursorUpdate(l);
+        _LinkedListCursorUpdate(l);
 
     LinkedListNodeFree(ln);
 
     return true;
 }
 
-bool LinkedListDeleteFirst(LinkedList l)
+/*Deletes the first item from the list*/
+bool LinkedListRemoveFirst(LinkedList l)
 {
     LinkedListNode head, next;
 
     assert(l != NULL);
 
-    if (LinkedListEmpty(l) == true)
+    if (LinkedListIsEmpty(l) == true)
+    {
+        SetErrorMessage("Delete from empty list.");
         return false;
+    }
 
     head = l->head;
 
@@ -550,24 +593,27 @@ bool LinkedListDeleteFirst(LinkedList l)
     else
         next->previous = NULL;
 
-    l->size--;
+    l->length--;
 
     if (head == l->cursor.current)
-        LinkedListCursorSetTo(l, next);
+        _LinkedListCursorSetTo(l, next);
     else
-        LinkedListCursorUpdate(l);
+        _LinkedListCursorUpdate(l);
 
     return true;
 }
 
-bool LinkedListDeleteLast(LinkedList l)
+bool LinkedListRemove(LinkedList l)
 {
     LinkedListNode tail, prev;
 
     assert(l != NULL);
 
-    if (LinkedListEmpty(l) == true)
+    if (LinkedListIsEmpty(l) == true)
+    {
+        SetErrorMessage("Delete from empty list.");
         return false;
+    }
 
     tail = l->tail;
 
@@ -584,33 +630,36 @@ bool LinkedListDeleteLast(LinkedList l)
     else
         prev->next = NULL;
 
-    l->size--;
+    l->length--;
 
     if (tail == l->cursor.current)
-        LinkedListCursorSetTo(l, NULL);
+        _LinkedListCursorSetTo(l, NULL);
     else
-        LinkedListCursorUpdate(l);
+        _LinkedListCursorUpdate(l);
 
     return true;
 }
 
-bool LinkedListDeleteX(LinkedList l, int x)
+bool LinkedListRemoveX(LinkedList l, size_t x)
 {
-    int i;
+    size_t i;
     LinkedListNode ln;
 
     assert(l != NULL);
-    assert(x >= 0);
 
-    i = LinkedListSize(l);
+    i = LinkedListLength(l);
 
-    assert(x < i);
+    if (x >= i)
+    {
+        SetErrorMessage("Index out of bounds.");
+        return false;
+    }
 
     if (x == 0)
-        return LinkedListDeleteFirst(l);
+        return LinkedListRemoveFirst(l);
 
     if (x == i - 1)
-        return LinkedListDeleteLast(l);
+        return LinkedListRemove(l);
 
     ln = l->head;
     for (i = 0; i < x && ln != NULL; i++)
@@ -619,20 +668,40 @@ bool LinkedListDeleteX(LinkedList l, int x)
     }
 
     assert(ln != NULL);
-    return LinkedListNodeDelete(l, ln);
+    return LinkedListNodeRemove(ln);
 }
 
-int LinkedListSearch(LinkedList l, bool (*comparator)(void *, void *), void *comparisonArg)
+LinkedList LinkedListCopy(LinkedList l)
+{
+    LinkedList result;
+    LinkedListNode ln;
+    void *data;
+
+    assert(l != NULL);
+
+    result = LinkedListCreate(l->capacity, l->free_fn, l->copy_fn);
+
+    for (ln = l->head; ln != NULL; ln = ln->next)
+    {
+        data = LinkedListNodeCopyData(ln);
+
+        LinkedListAdd(result, data);
+    }
+
+    return result;
+}
+
+int LinkedListIndexOf(LinkedList l, compare_fn_t compare_fn, void *compare_arg)
 {
     LinkedListNode ln;
     int i;
 
     assert(l != NULL);
-    assert(comparator != NULL);
+    assert(compare_fn != NULL);
 
     for (ln = l->head, i = 0; ln != NULL; ln = ln->next, i++)
     {
-        if ((*comparator)(ln->data, comparisonArg) == false)
+        if ((*compare_fn)(ln->data, compare_arg) == false)
             continue;
 
         return i;
@@ -641,19 +710,19 @@ int LinkedListSearch(LinkedList l, bool (*comparator)(void *, void *), void *com
     return -1;
 }
 
-int LinkedListCount(LinkedList l, bool (*comparator)(void *, void *), void *comparisonArg)
+size_t LinkedListCount(LinkedList l, compare_fn_t compare_fn, void *compare_arg)
 {
     LinkedListNode ln;
-    int i;
+    size_t i;
 
     assert(l != NULL);
-    assert(comparator != NULL);
+    assert(compare_fn != NULL);
 
     i = 0;
 
     for (ln = l->head; ln != NULL; ln = ln->next)
     {
-        if ((*comparator)(ln->data, comparisonArg) == false)
+        if ((*compare_fn)(ln->data, compare_arg) == false)
             continue;
 
         i++;
@@ -662,7 +731,32 @@ int LinkedListCount(LinkedList l, bool (*comparator)(void *, void *), void *comp
     return i;
 }
 
-bool LinkedListConcat(LinkedList the_LinkedList, LinkedList two_LinkedList)
+bool LinkedListContains(LinkedList l, compare_fn_t compare_fn, void *compare_arg)
+{
+    assert(l != NULL);
+    assert(compare_fn != NULL);
+
+    if (LinkedListIndexOf(l, compare_fn, compare_arg) == -1)
+        return false;
+
+    return true;
+}
+
+void LinkedListForEach(LinkedList l, foreach_fn_t foreach_fn)
+{
+    LinkedListNode ln;
+    size_t i;
+
+    assert(l != NULL);
+    assert(foreach_fn != NULL);
+
+    for (ln = l->head, i = 0; ln != NULL; ln = ln->next, i++)
+    {
+        foreach_fn(ln->data, i);
+    }
+}
+
+/* bool LinkedListConcat(LinkedList the_LinkedList, LinkedList two_LinkedList)
 {
     LinkedListNode two_head, two_tail, LinkedList_tail;
 
@@ -677,7 +771,7 @@ bool LinkedListConcat(LinkedList the_LinkedList, LinkedList two_LinkedList)
 
     two_LinkedList->head = NULL;
     LinkedListClear(two_LinkedList);
-    LinkedListCursorClear(the_LinkedList);
+    _LinkedListCursorClear(the_LinkedList);
 
     if (two_head == NULL)
         return true;
@@ -694,31 +788,6 @@ bool LinkedListConcat(LinkedList the_LinkedList, LinkedList two_LinkedList)
     two_head->previous = LinkedList_tail;
 
     return true;
-}
-
-LinkedList LinkedListCopy(LinkedList l)
-{
-    LinkedList result;
-    LinkedListNode ln;
-    void *data;
-    DataArgs dataArgs;
-
-    assert(l != NULL);
-
-    result = LinkedListCreate(l->capacity);
-
-    for (ln = l->head; ln != NULL; ln = ln->next)
-    {
-        data = LinkedListNodeCopyData(ln);
-
-        dataArgs.size = ln->size;
-        dataArgs.free_routine = ln->free_routine;
-        dataArgs.copy_routine = ln->copy_routine;
-
-        LinkedListAddLast(result, data, dataArgs);
-    }
-
-    return result;
 }
 
 LinkedList LinkedListGetSubLinkedList(LinkedList l, int i, int size)
@@ -776,7 +845,7 @@ void LinkedListFilter(LinkedList l, bool (*comparator)(void *, void *), void *co
     {
         LinkedListDeleteX(l, i);
     }
-}
+}*/
 
 void FreeLinkedList(void *a)
 {
@@ -788,18 +857,7 @@ void *CopyLinkedList(void *a)
     return LinkedListCopy((LinkedList)a);
 }
 
-DataArgs DataArgsLinkedList()
-{
-    DataArgs d;
-
-    d.size = sizeof(struct LinkedList);
-    d.free_routine = &FreeLinkedList;
-    d.copy_routine = &CopyLinkedList;
-
-    return d;
-}
-
-String LinkedListGetStringInt(LinkedList l)
+String LinkedListToStringInt(LinkedList l)
 {
     LinkedListNode ln;
     String result, temp;
@@ -833,7 +891,7 @@ String LinkedListGetStringInt(LinkedList l)
     return result;
 }
 
-String LinkedListGetStringString(LinkedList l)
+String LinkedListToStringString(LinkedList l)
 {
     LinkedListNode ln;
     String i, result;
@@ -866,22 +924,26 @@ String LinkedListGetStringString(LinkedList l)
     return result;
 }
 
-void LinkedListDebugPrintString(LinkedList l)
+void LinkedListPrintString(LinkedList l)
 {
     String s;
 
-    s = LinkedListGetStringString(l);
+    assert(l != NULL);
+
+    s = LinkedListToStringString(l);
 
     printf("%s\n", s);
 
     free(s);
 }
 
-void LinkedListDebugPrintInt(LinkedList l)
+void LinkedListPrintInt(LinkedList l)
 {
     String s;
 
-    s = LinkedListGetStringInt(l);
+    assert(l != NULL);
+
+    s = LinkedListToStringInt(l);
 
     printf("%s\n", s);
 
@@ -897,11 +959,11 @@ bool LinkedListCursorNext(LinkedList l)
         if (l->cursor.previous != NULL)
             return false;
 
-        LinkedListCursorSetTo(l, l->head);
+        _LinkedListCursorSetTo(l, l->head);
         return true;
     }
 
-    LinkedListCursorSetTo(l, l->cursor.current->next);
+    _LinkedListCursorSetTo(l, l->cursor.current->next);
     return true;
 }
 
@@ -914,11 +976,11 @@ bool LinkedListCursorPrevious(LinkedList l)
         if (l->cursor.current == NULL)
             return false;
 
-        LinkedListCursorSetTo(l, NULL);
+        _LinkedListCursorSetTo(l, NULL);
         return true;
     }
 
-    LinkedListCursorSetTo(l, l->cursor.previous);
+    _LinkedListCursorSetTo(l, l->cursor.previous);
     return true;
 }
 
@@ -934,6 +996,8 @@ bool LinkedListCursorIsNull(LinkedList l)
 
 bool LinkedListCursorBeforeHead(LinkedList l)
 {
+    assert(l != NULL);
+
     l->cursor.current = NULL;
     l->cursor.previous = NULL;
 
@@ -942,19 +1006,21 @@ bool LinkedListCursorBeforeHead(LinkedList l)
 
 bool LinkedListCursorAfterTail(LinkedList l)
 {
+    assert(l != NULL);
+
     l->cursor.current = NULL;
     l->cursor.previous = l->tail;
 
     return true;
 }
 
-bool LinkedListCursorSearchNext(LinkedList l, bool (*comparator)(void *, void *), void *comparisonArg)
+bool LinkedListCursorSearchNext(LinkedList l, compare_fn_t compare_fn, void *comparisonArg)
 {
     assert(l != NULL);
-    assert(comparator != NULL);
+    assert(compare_fn != NULL);
 
     LinkedListCursorNext(l);
-    while (LinkedListCursorIsNull(l) == false && (*comparator)(LinkedListCursorGet(l), comparisonArg) == false)
+    while (LinkedListCursorIsNull(l) == false && compare_fn(LinkedListCursorGet(l), comparisonArg) == false)
     {
         LinkedListCursorNext(l);
     }
@@ -965,13 +1031,13 @@ bool LinkedListCursorSearchNext(LinkedList l, bool (*comparator)(void *, void *)
     return true;
 }
 
-bool LinkedListCursorSearchBefore(LinkedList l, bool (*comparator)(void *, void *), void *comparisonArg)
+bool LinkedListCursorSearchPrevious(LinkedList l, compare_fn_t compare_fn, void *comparisonArg)
 {
     assert(l != NULL);
-    assert(comparator != NULL);
+    assert(compare_fn != NULL);
 
     LinkedListCursorPrevious(l);
-    while (LinkedListCursorIsNull(l) == false && (*comparator)(LinkedListCursorGet(l), comparisonArg) == false)
+    while (LinkedListCursorIsNull(l) == false && compare_fn(LinkedListCursorGet(l), comparisonArg) == false)
     {
         LinkedListCursorPrevious(l);
     }
@@ -1016,42 +1082,54 @@ bool LinkedListCursorHasPrevious(LinkedList l)
 void *LinkedListCursorGet(LinkedList l)
 {
     assert(l != NULL);
-    assert(LinkedListCursorIsNull(l) == false);
+
+    if (LinkedListCursorIsNull(l) == true)
+    {
+        return NULL;
+    }
 
     return l->cursor.current->data;
 }
 
-bool LinkedListCursorChange(LinkedList l, void *data, DataArgs dataArgs)
+bool LinkedListCursorSet(LinkedList l, void *data)
 {
     assert(l != NULL);
-    assert(LinkedListCursorIsNull(l) == false);
 
-    return LinkedListNodeChange(l->cursor.current, data, dataArgs);
+    if (LinkedListCursorIsNull(l) == true)
+    {
+        return false;
+    }
+
+    return LinkedListNodeSet(l->cursor.current, data);
 }
 
-bool LinkedListCursorAdd(LinkedList l, void *data, DataArgs dataArgs)
+bool LinkedListCursorAdd(LinkedList l, void *data)
 {
     assert(l != NULL);
 
     if (l->cursor.previous == NULL)
-        return LinkedListAddFirst(l, data, dataArgs);
+        return LinkedListAddFirst(l, data);
 
     if (l->cursor.previous == l->tail)
-        return LinkedListAddLast(l, data, dataArgs);
+        return LinkedListAdd(l, data);
 
-    return LinkedListNodeAdd(l, l->cursor.current, data, dataArgs);
+    return LinkedListNodeAdd(l->cursor.current, data);
 }
 
-bool LinkedListCursorDelete(LinkedList l)
+bool LinkedListCursorRemove(LinkedList l)
 {
     assert(l != NULL);
-    assert(LinkedListCursorIsNull(l) == false);
+
+    if (LinkedListCursorIsNull(l) == true)
+    {
+        return false;
+    }
 
     if (l->cursor.current == l->head)
-        return LinkedListDeleteFirst(l);
+        return LinkedListRemoveFirst(l);
 
     if (l->cursor.current == l->tail)
-        return LinkedListDeleteLast(l);
+        return LinkedListRemove(l);
 
-    return LinkedListNodeDelete(l, l->cursor.current);
+    return LinkedListNodeRemove(l->cursor.current);
 }

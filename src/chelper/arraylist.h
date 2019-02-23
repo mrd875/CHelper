@@ -68,6 +68,9 @@ bool ArrayListRemove(ArrayList l);
 /* Gets the last element in the list. */
 void *ArrayListGet(ArrayList l);
 
+/*Sets the data at the end of the list*/
+bool ArrayListSet(ArrayList l, void *data);
+
 /*
     Searches the Arraylist given a compare function and compare argument, will return the index of the found element, -1 if not found.
 */
