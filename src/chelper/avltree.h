@@ -19,6 +19,9 @@ void AVLTreeFree(AVLTree t);
 /*CLears the tree*/
 void AVLTreeClear(AVLTree t);
 
+/*Gets the amount of elements in the tree.*/
+size_t AVLTreeLength(AVLTree t);
+
 /*Sets the key into the tree*/
 bool AVLTreeSet(AVLTree t, int key, void *data);
 

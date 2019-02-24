@@ -18,22 +18,59 @@ void fail(String src)
 int main(void)
 {
     AVLTree t;
-    int i, ran;
+    int i, low, high;
+    size_t size;
 
     t = AVLTreeCreate(&free, &CopyInt);
 
-    for (i = -1000000; i < 1000000; i++)
+    low = -1000;
+    high = 1000;
+    size = 0;
+
+    if (AVLTreeLength(t) != size)
+        fail("Size was wrong!");
+
+    for (i = low; i <= high; i++)
     {
-        ran = rand();
+        AVLTreeSet(t, i, IntCopy(i));
+        size++;
 
-        AVLTreeSet(t, ran, IntCopy(i));
-
-        if (!AVLTreeHas(t, ran))
+        if (!AVLTreeHas(t, i))
             fail("Doesn't has!");
 
-        if (*(int *)AVLTreeGet(t, ran) != i)
+        if (*(int *)AVLTreeGet(t, i) != i)
+            fail("Wrong get!");
+
+        if (AVLTreeLength(t) != size)
+            fail("Size was wrong!");
+    }
+
+    if (AVLTreeLength(t) != size)
+        fail("Size was wrong!");
+
+    for (i = low; i <= high; i++)
+    {
+        if (!AVLTreeHas(t, i))
+            fail("Doesn't has!");
+
+        if (*(int *)AVLTreeGet(t, i) != i)
             fail("Wrong get!");
     }
+
+    for (i = low; i <= high; i++)
+    {
+        AVLTreeRemove(t, i);
+        size--;
+
+        if (AVLTreeHas(t, i))
+            fail("Has!");
+
+        if (AVLTreeLength(t) != size)
+            fail("Size was wrong!");
+    }
+
+    if (AVLTreeLength(t) != size)
+        fail("Size was wrong!");
 
     AVLTreeFree(t);
 

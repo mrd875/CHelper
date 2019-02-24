@@ -195,6 +195,8 @@ AVLTreeNode AVLTreeNodeSet(AVLTree t, AVLTreeNode node, int key, void *data)
 
     if (node == NULL)
     {
+        assert(t != NULL);
+        t->length++;
         return AVLTreeNodeCreate(t, key, data);
     }
 
@@ -248,6 +250,7 @@ AVLTreeNode AVLTreeNodeRemove(AVLTreeNode n, int key)
 {
     int nodeKey, balance;
     AVLTreeNode temp;
+    void *data;
 
     if (n == NULL)
         return NULL;
@@ -262,10 +265,27 @@ AVLTreeNode AVLTreeNodeRemove(AVLTreeNode n, int key)
     {
         if (n->left == NULL || n->right == NULL)
         {
+            temp = n->left;
+            if (temp == NULL)
+                temp = n->right;
+
+            assert(n->owner != NULL);
+
+            n->owner->length--;
+            AVLTreeNodeFree(n);
+            n = temp;
         }
         else
         {
             temp = AVLTreeNodeMin(n->right);
+
+            data = temp->data;
+            temp->data = n->data;
+
+            n->data = data;
+            n->key = temp->key;
+
+            n->right = AVLTreeNodeRemove(n->right, temp->key);
         }
     }
 
@@ -321,6 +341,13 @@ void AVLTreeFree(AVLTree t)
     free(t);
 }
 
+size_t AVLTreeLength(AVLTree t)
+{
+    assert(t != NULL);
+
+    return t->length;
+}
+
 void AVLTreeClear(AVLTree t)
 {
     assert(t != NULL);
@@ -333,7 +360,6 @@ bool AVLTreeSet(AVLTree t, int key, void *data)
     assert(t != NULL);
 
     t->root = AVLTreeNodeSet(t, t->root, key, data);
-    t->length++;
 
     return true;
 }
@@ -387,7 +413,6 @@ bool AVLTreeRemove(AVLTree t, int key)
     assert(t != NULL);
 
     t->root = AVLTreeNodeRemove(t->root, key);
-    t->length--;
 
     return true;
 }

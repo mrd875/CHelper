@@ -330,6 +330,8 @@ void _DictionaryResize(Dictionary d, size_t newSize)
 
         ArrayListFree(l);
     }
+
+    free(oldData);
 }
 
 /*Returns the load factor of the dictionary*/
