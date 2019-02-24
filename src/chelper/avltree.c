@@ -416,3 +416,27 @@ bool AVLTreeRemove(AVLTree t, int key)
 
     return true;
 }
+
+/*Does recursively inorder.*/
+size_t AVLTreeNodeInorderForEach(AVLTreeNode n, foreach_fn_t foreach_fn, size_t i)
+{
+    if (n == NULL)
+        return i;
+
+    i = AVLTreeNodeInorderForEach(n->left, foreach_fn, i);
+
+    foreach_fn(n->data, i);
+    i++;
+
+    i = AVLTreeNodeInorderForEach(n->right, foreach_fn, i);
+
+    return i;
+}
+
+void AVLTreeInorderForEach(AVLTree t, foreach_fn_t foreach_fn)
+{
+    assert(t != NULL);
+    assert(foreach_fn != NULL);
+
+    AVLTreeNodeInorderForEach(t->root, foreach_fn, 0);
+}

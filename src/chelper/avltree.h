@@ -34,4 +34,7 @@ void *AVLTreeGet(AVLTree t, int key);
 /*Removes the key*/
 bool AVLTreeRemove(AVLTree t, int key);
 
+/*Does an inorder traversal.*/
+void AVLTreeInorderForEach(AVLTree t, foreach_fn_t foreach_fn);
+
 #endif /* __CHELPERAVL__ */
