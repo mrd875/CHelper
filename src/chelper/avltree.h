@@ -22,8 +22,8 @@ void AVLTreeClear(AVLTree t);
 /*Gets the amount of elements in the tree.*/
 size_t AVLTreeLength(AVLTree t);
 
-/*Sets the key into the tree*/
-bool AVLTreeSet(AVLTree t, int key, void *data);
+/*Adds the key into the tree*/
+bool AVLTreeAdd(AVLTree t, int key, void *data);
 
 /*Has the key*/
 bool AVLTreeHas(AVLTree t, int key);
@@ -36,5 +36,8 @@ bool AVLTreeRemove(AVLTree t, int key);
 
 /*Does an inorder traversal.*/
 void AVLTreeInorderForEach(AVLTree t, foreach_fn_t foreach_fn);
+
+/*Prints the tree's keys*/
+void AVLTreePrintKeys(AVLTree t);
 
 #endif /* __CHELPERAVL__ */

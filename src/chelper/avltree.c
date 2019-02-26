@@ -189,7 +189,7 @@ AVLTreeNode AVLTreeNodeMin(AVLTreeNode n)
     return a;
 }
 
-AVLTreeNode AVLTreeNodeSet(AVLTree t, AVLTreeNode node, int key, void *data)
+AVLTreeNode AVLTreeNodeAdd(AVLTree t, AVLTreeNode node, int key, void *data)
 {
     int nodeKey, balance;
 
@@ -204,17 +204,11 @@ AVLTreeNode AVLTreeNodeSet(AVLTree t, AVLTreeNode node, int key, void *data)
 
     if (key < nodeKey)
     {
-        node->left = AVLTreeNodeSet(t, node->left, key, data);
-    }
-    else if (key > nodeKey)
-    {
-        node->right = AVLTreeNodeSet(t, node->right, key, data);
+        node->left = AVLTreeNodeAdd(t, node->left, key, data);
     }
     else
     {
-        AVLTreeNodeDataFree(node);
-        node->data = data;
-        return node;
+        node->right = AVLTreeNodeAdd(t, node->right, key, data);
     }
 
     node->height = max(height(node->left), height(node->right)) + 1;
@@ -352,14 +346,21 @@ void AVLTreeClear(AVLTree t)
 {
     assert(t != NULL);
     AVLTreeNodeFreeTree(t->root);
+    t->root = NULL;
     t->length = 0;
 }
 
-bool AVLTreeSet(AVLTree t, int key, void *data)
+bool AVLTreeAdd(AVLTree t, int key, void *data)
 {
+    size_t oldSize;
     assert(t != NULL);
 
-    t->root = AVLTreeNodeSet(t, t->root, key, data);
+    oldSize = AVLTreeLength(t);
+
+    t->root = AVLTreeNodeAdd(t, t->root, key, data);
+
+    if (oldSize == AVLTreeLength(t))
+        return false;
 
     return true;
 }
@@ -410,9 +411,15 @@ bool AVLTreeHas(AVLTree t, int key)
 
 bool AVLTreeRemove(AVLTree t, int key)
 {
+    size_t oldSize;
     assert(t != NULL);
 
+    oldSize = AVLTreeLength(t);
+
     t->root = AVLTreeNodeRemove(t->root, key);
+
+    if (oldSize == AVLTreeLength(t))
+        return false;
 
     return true;
 }
@@ -439,4 +446,56 @@ void AVLTreeInorderForEach(AVLTree t, foreach_fn_t foreach_fn)
     assert(foreach_fn != NULL);
 
     AVLTreeNodeInorderForEach(t->root, foreach_fn, 0);
+}
+
+String AVLTreeNodePrintKeys(AVLTreeNode n, size_t depth)
+{
+    size_t i;
+    String blanks, left, right, here, answer;
+
+    blanks = StringCopy("");
+    for (i = 0; i < depth - 1; i++)
+    {
+        blanks = StringAdd(blanks, "            ");
+    }
+
+    if (n == NULL)
+    {
+        left = StringCopy("");
+        here = StringFormat("%lu/%lu: -", depth, height(n));
+        right = StringCopy("");
+    }
+    else
+    {
+        left = AVLTreeNodePrintKeys(n->left, depth + 1);
+        here = StringFormat("%lu/%lu: %d", depth, height(n), n->key);
+        right = AVLTreeNodePrintKeys(n->right, depth + 1);
+    }
+
+    answer = StringCopy(left);
+    answer = StringAdd(answer, "\n");
+    answer = StringAdd(answer, blanks);
+    answer = StringAdd(answer, here);
+    answer = StringAdd(answer, "\n");
+    answer = StringAdd(answer, right);
+
+    free(left);
+    free(right);
+    free(blanks);
+    free(here);
+
+    return answer;
+}
+
+void AVLTreePrintKeys(AVLTree t)
+{
+    String s;
+
+    assert(t != NULL);
+
+    s = AVLTreeNodePrintKeys(t->root, 1);
+
+    printf("%s\n", s);
+
+    free(s);
 }
