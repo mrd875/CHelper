@@ -189,60 +189,66 @@ AVLTreeNode AVLTreeNodeMin(AVLTreeNode n)
     return a;
 }
 
-AVLTreeNode AVLTreeNodeAdd(AVLTree t, AVLTreeNode node, int key, void *data)
+AVLTreeNode AVLTreeNodeRestoreAVL(AVLTreeNode n)
 {
-    int nodeKey, balance;
+    int balance;
 
-    if (node == NULL)
+    if (n == NULL)
+        return NULL;
+
+    n->height = max(height(n->left), height(n->right)) + 1;
+
+    balance = getBalance(n);
+
+    if (balance > 1 && getBalance(n->left) >= 0)
+        return AVLTreeNodeRightRotate(n);
+
+    if (balance > 1 && getBalance(n->left) < 0)
+    {
+        n->left = AVLTreeNodeLeftRotate(n->left);
+        return AVLTreeNodeRightRotate(n);
+    }
+
+    if (balance < -1 && getBalance(n->right) <= 0)
+        return AVLTreeNodeLeftRotate(n);
+
+    if (balance < -1 && getBalance(n->right) > 0)
+    {
+        n->right = AVLTreeNodeRightRotate(n->right);
+        return AVLTreeNodeLeftRotate(n);
+    }
+
+    return n;
+}
+
+AVLTreeNode AVLTreeNodeAdd(AVLTree t, AVLTreeNode n, int key, void *data)
+{
+    int nodeKey;
+
+    if (n == NULL)
     {
         assert(t != NULL);
         t->length++;
         return AVLTreeNodeCreate(t, key, data);
     }
 
-    nodeKey = node->key;
+    nodeKey = n->key;
 
     if (key < nodeKey)
     {
-        node->left = AVLTreeNodeAdd(t, node->left, key, data);
+        n->left = AVLTreeNodeAdd(t, n->left, key, data);
     }
     else
     {
-        node->right = AVLTreeNodeAdd(t, node->right, key, data);
+        n->right = AVLTreeNodeAdd(t, n->right, key, data);
     }
 
-    node->height = max(height(node->left), height(node->right)) + 1;
-
-    balance = getBalance(node);
-
-    if (balance > 1 && key < node->left->key)
-    {
-        return AVLTreeNodeRightRotate(node);
-    }
-
-    if (balance < -1 && key > node->right->key)
-    {
-        return AVLTreeNodeLeftRotate(node);
-    }
-
-    if (balance > 1 && key > node->left->key)
-    {
-        node->left = AVLTreeNodeLeftRotate(node->left);
-        return AVLTreeNodeRightRotate(node);
-    }
-
-    if (balance < -1 && key < node->right->key)
-    {
-        node->right = AVLTreeNodeRightRotate(node->right);
-        return AVLTreeNodeLeftRotate(node);
-    }
-
-    return node;
+    return AVLTreeNodeRestoreAVL(n);
 }
 
 AVLTreeNode AVLTreeNodeRemove(AVLTreeNode n, int key)
 {
-    int nodeKey, balance;
+    int nodeKey;
     AVLTreeNode temp;
     void *data;
 
@@ -283,32 +289,7 @@ AVLTreeNode AVLTreeNodeRemove(AVLTreeNode n, int key)
         }
     }
 
-    if (n == NULL)
-        return NULL;
-
-    n->height = max(height(n->left), height(n->right)) + 1;
-
-    balance = getBalance(n);
-
-    if (balance > 1 && getBalance(n->left) >= 0)
-        return AVLTreeNodeRightRotate(n);
-
-    if (balance > 1 && getBalance(n->left) < 0)
-    {
-        n->left = AVLTreeNodeLeftRotate(n->left);
-        return AVLTreeNodeRightRotate(n);
-    }
-
-    if (balance < -1 && getBalance(n->right) <= 0)
-        return AVLTreeNodeLeftRotate(n);
-
-    if (balance < -1 && getBalance(n->right) > 0)
-    {
-        n->right = AVLTreeNodeRightRotate(n->right);
-        return AVLTreeNodeLeftRotate(n);
-    }
-
-    return n;
+    return AVLTreeNodeRestoreAVL(n);
 }
 
 AVLTree AVLTreeCreate(free_fn_t free_fn, copy_fn_t copy_fn)

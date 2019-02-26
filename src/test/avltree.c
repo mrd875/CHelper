@@ -123,6 +123,13 @@ int main(void)
     AVLTreePrintKeys(t);
     AVLTreeClear(t);
 
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreePrintKeys(t);
+
     AVLTreeFree(t);
 
     printf("COMPLETED TESTS\n");
