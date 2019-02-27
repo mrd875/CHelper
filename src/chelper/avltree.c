@@ -60,6 +60,15 @@ int height(AVLTreeNode n)
     return n->height;
 }
 
+/*Gets the blance*/
+int getBalance(AVLTreeNode n)
+{
+    if (n == NULL)
+        return 0;
+
+    return height(n->left) - height(n->right);
+}
+
 /*Creates a node*/
 AVLTreeNode AVLTreeNodeCreate(AVLTree t, int key, void *data)
 {
@@ -166,15 +175,6 @@ AVLTreeNode AVLTreeNodeLeftRotate(AVLTreeNode n)
     return x;
 }
 
-/*Gets the blance*/
-int getBalance(AVLTreeNode n)
-{
-    if (n == NULL)
-        return 0;
-
-    return height(n->left) - height(n->right);
-}
-
 /*Get the left most node from this node*/
 AVLTreeNode AVLTreeNodeMin(AVLTreeNode n)
 {
@@ -189,6 +189,7 @@ AVLTreeNode AVLTreeNodeMin(AVLTreeNode n)
     return a;
 }
 
+/*Restores the avl invarient on the node.*/
 AVLTreeNode AVLTreeNodeRestoreAVL(AVLTreeNode n)
 {
     int balance;
@@ -200,27 +201,26 @@ AVLTreeNode AVLTreeNodeRestoreAVL(AVLTreeNode n)
 
     balance = getBalance(n);
 
-    if (balance > 1 && getBalance(n->left) >= 0)
-        return AVLTreeNodeRightRotate(n);
-
-    if (balance > 1 && getBalance(n->left) < 0)
+    if (balance > 1)
     {
-        n->left = AVLTreeNodeLeftRotate(n->left);
+        if (getBalance(n->left) < 0)
+            n->left = AVLTreeNodeLeftRotate(n->left);
+
         return AVLTreeNodeRightRotate(n);
     }
 
-    if (balance < -1 && getBalance(n->right) <= 0)
-        return AVLTreeNodeLeftRotate(n);
-
-    if (balance < -1 && getBalance(n->right) > 0)
+    if (balance < -1)
     {
-        n->right = AVLTreeNodeRightRotate(n->right);
+        if (getBalance(n->right) > 0)
+            n->right = AVLTreeNodeRightRotate(n->right);
+
         return AVLTreeNodeLeftRotate(n);
     }
 
     return n;
 }
 
+/*Adds data to the node resursive*/
 AVLTreeNode AVLTreeNodeAdd(AVLTree t, AVLTreeNode n, int key, void *data)
 {
     int nodeKey;
@@ -246,6 +246,7 @@ AVLTreeNode AVLTreeNodeAdd(AVLTree t, AVLTreeNode n, int key, void *data)
     return AVLTreeNodeRestoreAVL(n);
 }
 
+/*Removes data from the node, recursive*/
 AVLTreeNode AVLTreeNodeRemove(AVLTreeNode n, int key)
 {
     int nodeKey;

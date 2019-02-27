@@ -128,6 +128,9 @@ int main(void)
     AVLTreeAdd(t, 9, IntCopy(0));
     AVLTreeAdd(t, 9, IntCopy(0));
     AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeAdd(t, 9, IntCopy(0));
+    AVLTreeRemove(t, 9);
     AVLTreePrintKeys(t);
 
     AVLTreeFree(t);
