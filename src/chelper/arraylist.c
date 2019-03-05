@@ -114,6 +114,13 @@ void ArrayListClearFree(ArrayList l)
     l->free_fn = NULL;
 }
 
+void **ArrayListGetArray(ArrayList l)
+{
+    assert(l != NULL);
+
+    return l->arr;
+}
+
 void ArrayListClear(ArrayList l)
 {
     size_t i, len;

@@ -7,6 +7,7 @@
 #include "arraylist.h"
 #include "common.h"
 #include "internal/common.h"
+#include "internal/arraylist.h"
 #include "string.h"
 
 /*Heap node*/

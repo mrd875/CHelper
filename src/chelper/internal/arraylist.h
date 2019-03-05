@@ -6,4 +6,7 @@
 /*Clears the free'ing of the list. Used for when you want to move items. */
 void ArrayListClearFree(ArrayList l);
 
+/*Gets the real array.*/
+void **ArrayListGetArray(ArrayList l);
+
 #endif /* __CHELPARRAYLISTINTERN__ */
