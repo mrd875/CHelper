@@ -43,7 +43,7 @@ struct AVLTree
 };
 
 /*Returns max of the two*/
-int max(int a, int b)
+int AVLMax(int a, int b)
 {
     if (a > b)
         return a;
@@ -52,7 +52,7 @@ int max(int a, int b)
 }
 
 /*Returns the height of the subtree*/
-int height(AVLTreeNode n)
+int AVLTreeNodeGetHeight(AVLTreeNode n)
 {
     if (n == NULL)
         return 0;
@@ -61,12 +61,12 @@ int height(AVLTreeNode n)
 }
 
 /*Gets the blance*/
-int getBalance(AVLTreeNode n)
+int AVLTreeNodeGetBalance(AVLTreeNode n)
 {
     if (n == NULL)
         return 0;
 
-    return height(n->left) - height(n->right);
+    return AVLTreeNodeGetHeight(n->left) - AVLTreeNodeGetHeight(n->right);
 }
 
 /*Creates a node*/
@@ -149,8 +149,8 @@ AVLTreeNode AVLTreeNodeRightRotate(AVLTreeNode n)
     x->right = n;
     n->left = y;
 
-    n->height = max(height(n->left), height(n->right)) + 1;
-    x->height = max(height(x->left), height(x->right)) + 1;
+    n->height = AVLMax(AVLTreeNodeGetHeight(n->left), AVLTreeNodeGetHeight(n->right)) + 1;
+    x->height = AVLMax(AVLTreeNodeGetHeight(x->left), AVLTreeNodeGetHeight(x->right)) + 1;
 
     return x;
 }
@@ -169,8 +169,8 @@ AVLTreeNode AVLTreeNodeLeftRotate(AVLTreeNode n)
     x->left = n;
     n->right = y;
 
-    n->height = max(height(n->left), height(n->right)) + 1;
-    x->height = max(height(x->left), height(x->right)) + 1;
+    n->height = AVLMax(AVLTreeNodeGetHeight(n->left), AVLTreeNodeGetHeight(n->right)) + 1;
+    x->height = AVLMax(AVLTreeNodeGetHeight(x->left), AVLTreeNodeGetHeight(x->right)) + 1;
 
     return x;
 }
@@ -197,13 +197,13 @@ AVLTreeNode AVLTreeNodeRestoreAVL(AVLTreeNode n)
     if (n == NULL)
         return NULL;
 
-    n->height = max(height(n->left), height(n->right)) + 1;
+    n->height = AVLMax(AVLTreeNodeGetHeight(n->left), AVLTreeNodeGetHeight(n->right)) + 1;
 
-    balance = getBalance(n);
+    balance = AVLTreeNodeGetBalance(n);
 
     if (balance > 1)
     {
-        if (getBalance(n->left) < 0)
+        if (AVLTreeNodeGetBalance(n->left) < 0)
             n->left = AVLTreeNodeLeftRotate(n->left);
 
         return AVLTreeNodeRightRotate(n);
@@ -211,7 +211,7 @@ AVLTreeNode AVLTreeNodeRestoreAVL(AVLTreeNode n)
 
     if (balance < -1)
     {
-        if (getBalance(n->right) > 0)
+        if (AVLTreeNodeGetBalance(n->right) > 0)
             n->right = AVLTreeNodeRightRotate(n->right);
 
         return AVLTreeNodeLeftRotate(n);
@@ -444,13 +444,13 @@ String AVLTreeNodePrintKeys(AVLTreeNode n, size_t depth)
     if (n == NULL)
     {
         left = StringCopy("");
-        here = StringFormat("%lu/%lu: -", depth, height(n));
+        here = StringFormat("%lu/%lu: -", depth, AVLTreeNodeGetHeight(n));
         right = StringCopy("");
     }
     else
     {
         left = AVLTreeNodePrintKeys(n->left, depth + 1);
-        here = StringFormat("%lu/%lu: %d", depth, height(n), n->key);
+        here = StringFormat("%lu/%lu: %d", depth, AVLTreeNodeGetHeight(n), n->key);
         right = AVLTreeNodePrintKeys(n->right, depth + 1);
     }
 
