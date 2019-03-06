@@ -8,6 +8,7 @@
 typedef struct Heap *Heap;
 
 #include "common.h"
+#include "arraylist.h"
 #include "string.h"
 
 /*Creates a new Heap*/
@@ -36,5 +37,8 @@ bool HeapChangeKey(Heap h, int key, int newK);
 
 /*Adds the item to the heap*/
 bool HeapAdd(Heap h, int key, void *data);
+
+/*Returns an array of all the elements heap sorted copied.*/
+ArrayList HeapToArrayList(Heap h);
 
 #endif /* __CHELPERHEAP__ */

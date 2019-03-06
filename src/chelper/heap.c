@@ -98,7 +98,7 @@ Heap HeapCreate(bool reverse, free_fn_t free_fn, copy_fn_t copy_fn)
     h->free_fn = free_fn;
     h->reverse = reverse;
 
-    h->data = ArrayListCreate(-1, &HeapNodeFree, &HeapNodeCopy);
+    h->data = ArrayListCreate(0, &HeapNodeFree, &HeapNodeCopy);
 
     return h;
 }
@@ -106,12 +106,25 @@ Heap HeapCreate(bool reverse, free_fn_t free_fn, copy_fn_t copy_fn)
 Heap HeapCopy(Heap h)
 {
     Heap copy;
+    ArrayList l;
+    HeapNode *arr;
+    size_t i, sz;
 
     assert(h != NULL);
 
     copy = HeapCreate(h->reverse, h->free_fn, h->copy_fn);
     ArrayListFree(copy->data);
-    copy->data = ArrayListCopy(h->data);
+    l = ArrayListCopy(h->data);
+
+    sz = ArrayListLength(l);
+    arr = (HeapNode *)ArrayListGetArray(l);
+
+    for (i = 0; i < sz; i++)
+    {
+        arr[i]->owner = copy;
+    }
+
+    copy->data = l;
 
     return copy;
 }
@@ -176,9 +189,9 @@ int _HeapNextChild(HeapNode *arr, size_t node, size_t hsize, bool rev)
 
 bool HeapRemove(Heap h)
 {
-    size_t remove, last, next;
+    size_t remove, last;
     HeapNode *arr, temp;
-    int key;
+    int key, next;
 
     assert(h != NULL);
 
@@ -186,7 +199,7 @@ bool HeapRemove(Heap h)
     if (remove <= 0)
         return false;
 
-    arr = ArrayListGetArray(h->data);
+    arr = (HeapNode *)ArrayListGetArray(h->data);
     temp = arr[remove - 1];
 
     arr[remove - 1] = arr[0];
@@ -199,7 +212,7 @@ bool HeapRemove(Heap h)
     if (remove <= 0)
         return true;
 
-    arr = ArrayListGetArray(h->data);
+    arr = (HeapNode *)ArrayListGetArray(h->data);
     last = 1;
     next = _HeapNextChild(arr, 1, remove, h->reverse);
     key = temp->key;
@@ -250,4 +263,28 @@ bool HeapAdd(Heap h, int key, void *data)
     }
 
     return true;
+}
+
+ArrayList HeapToArrayList(Heap h)
+{
+    ArrayList answer;
+    Heap tempH;
+
+    assert(h != NULL);
+
+    tempH = HeapCopy(h);
+    tempH->free_fn = NULL;
+
+    answer = ArrayListCreate(0, h->free_fn, h->copy_fn);
+
+    while (HeapLength(tempH) > 0)
+    {
+        ArrayListAdd(answer, HeapGet(tempH));
+
+        HeapRemove(tempH);
+    }
+
+    HeapFree(tempH);
+
+    return answer;
 }
