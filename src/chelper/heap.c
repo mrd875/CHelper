@@ -141,14 +141,113 @@ size_t HeapLength(Heap h)
     return ArrayListLength(h->data);
 }
 
-/*Gets the item in the heap*/
-void *HeapGet(Heap h);
+void *HeapGet(Heap h)
+{
+    HeapNode hn;
+    assert(h != NULL);
 
-/*Removes the item from the heap*/
-bool HeapRemove(Heap h);
+    if (HeapLength(h) <= 0)
+        return NULL;
+
+    hn = ArrayListGetX(h->data, 0);
+
+    return hn->data;
+}
+
+/*Gets next child, helper*/
+int _HeapNextChild(HeapNode *arr, size_t node, size_t hsize)
+{
+    size_t left, right;
+
+    left = node * 2;
+    right = left + 1;
+
+    if (left > hsize)
+        return -1;
+
+    if (right > hsize)
+        return (int)left;
+
+    if (1)
+        return (int)left;
+
+    return (int)right;
+}
+
+bool HeapRemove(Heap h)
+{
+    size_t remove, last, next;
+    HeapNode *arr, temp;
+    int key;
+
+    assert(h != NULL);
+
+    remove = HeapLength(h);
+    if (remove <= 0)
+        return false;
+
+    arr = ArrayListGetArray(h->data);
+    temp = arr[remove - 1];
+
+    arr[remove - 1] = arr[0];
+    arr[0] = temp;
+
+    ArrayListRemove(h->data);
+
+    remove--;
+
+    if (remove <= 0)
+        return true;
+
+    arr = ArrayListGetArray(h->data);
+    last = 1;
+    next = _HeapNextChild(arr, 1, remove);
+    key = temp->key;
+
+    while (next != -1)
+    {
+        if ((key > arr[next - 1]->key) != h->reverse)
+            break;
+
+        arr[last - 1] = arr[next - 1];
+        arr[next - 1] = temp;
+
+        last = next;
+        next = _HeapNextChild(arr, next, remove);
+    }
+
+    return true;
+}
 
 /*Updates the key*/
 bool HeapChangeKey(Heap h, int key, int newK);
 
-/*Adds the item to the heap*/
-bool HeapAdd(Heap h, int key, void *data);
+bool HeapAdd(Heap h, int key, void *data)
+{
+    size_t insert, current, last;
+    HeapNode *arr, newNode;
+
+    assert(h != NULL);
+
+    insert = ArrayListLength(h->data);
+
+    newNode = HeapNodeCreate(key, data, h);
+    ArrayListAdd(h->data, newNode);
+
+    arr = (HeapNode *)ArrayListGetArray(h->data);
+
+    current = insert + 1;
+    while (current > 1)
+    {
+        last = current;
+        current = current / 2;
+
+        if ((key > arr[current - 1]->key) == h->reverse)
+            break;
+
+        arr[last - 1] = arr[current - 1];
+        arr[current - 1] = newNode;
+    }
+
+    return true;
+}
