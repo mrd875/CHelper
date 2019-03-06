@@ -155,7 +155,7 @@ void *HeapGet(Heap h)
 }
 
 /*Gets next child, helper*/
-int _HeapNextChild(HeapNode *arr, size_t node, size_t hsize)
+int _HeapNextChild(HeapNode *arr, size_t node, size_t hsize, bool rev)
 {
     size_t left, right;
 
@@ -168,7 +168,7 @@ int _HeapNextChild(HeapNode *arr, size_t node, size_t hsize)
     if (right > hsize)
         return (int)left;
 
-    if (1)
+    if ((arr[left - 1]->key > arr[right - 1]->key) != rev)
         return (int)left;
 
     return (int)right;
@@ -201,7 +201,7 @@ bool HeapRemove(Heap h)
 
     arr = ArrayListGetArray(h->data);
     last = 1;
-    next = _HeapNextChild(arr, 1, remove);
+    next = _HeapNextChild(arr, 1, remove, h->reverse);
     key = temp->key;
 
     while (next != -1)
@@ -213,7 +213,7 @@ bool HeapRemove(Heap h)
         arr[next - 1] = temp;
 
         last = next;
-        next = _HeapNextChild(arr, next, remove);
+        next = _HeapNextChild(arr, next, remove, h->reverse);
     }
 
     return true;
