@@ -17,6 +17,34 @@ void fail(String src)
 
 int main(void)
 {
+    StringBuilder sb;
+    int i;
+
+    sb = StringBuilderCreate();
+
+    StringBuilderAdd(sb, "hi ");
+    StringBuilderAdd(sb, "there.");
+
+    StringBuilderPrint(sb);
+
+    StringBuilderClear(sb);
+
+    StringBuilderAdd(sb, "hi ");
+    StringBuilderAdd(sb, "there ");
+    StringBuilderAdd(sb, "again.");
+
+    StringBuilderPrint(sb);
+
+    StringBuilderClear(sb);
+
+    for (i = 0; i < 10000; i++)
+    {
+        StringBuilderAddFormatted(sb, "%d ", i);
+    }
+
+    StringBuilderPrint(sb);
+
+    StringBuilderFree(sb);
 
     printf("COMPLETED TESTS\n");
 

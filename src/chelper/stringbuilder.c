@@ -98,7 +98,27 @@ bool StringBuilderAdd(StringBuilder sb, String s)
 }
 
 /*Adds a formatted string.*/
-bool StringBuilderAddFormatted(StringBuilder sb, String fmt, ...);
+bool StringBuilderAddFormatted(StringBuilder sb, String fmt, ...)
+{
+    char buff[MAX_STRING_BUFFER + 1];
+    va_list args;
+    int rc;
+
+    assert(sb != NULL);
+    assert(fmt != NULL);
+
+    buff[MAX_STRING_BUFFER] = '\0';
+    rc = 0;
+
+    va_start(args, fmt);
+    rc = vsnprintf(buff, MAX_STRING_BUFFER, fmt, args);
+    va_end(args);
+
+    if (rc < 0)
+        return false;
+
+    return StringBuilderAdd(sb, buff);
+}
 
 String StringBuilderToString(StringBuilder sb)
 {
