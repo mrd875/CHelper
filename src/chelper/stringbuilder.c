@@ -97,7 +97,6 @@ bool StringBuilderAdd(StringBuilder sb, String s)
     return true;
 }
 
-/*Adds a formatted string.*/
 bool StringBuilderAddFormatted(StringBuilder sb, String fmt, ...)
 {
     char buff[MAX_STRING_BUFFER + 1];
