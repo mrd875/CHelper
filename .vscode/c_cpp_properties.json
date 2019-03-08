@@ -4,9 +4,7 @@
       "name": "Linux",
       "intelliSenseMode": "gcc-x64",
       "compilerPath": "/usr/bin/gcc",
-      "includePath": [
-        "${workspaceFolder}/**"
-      ],
+      "includePath": ["${workspaceFolder}/**"],
       "defines": [
         "_DEBUG",
         "UNICODE",
@@ -19,7 +17,7 @@
     },
     {
       "name": "Windows",
-      "intelliSenseMode": "gcc-x64",
+      "intelliSenseMode": "msvc-x64",
       "compilerPath": "C:\\msys64\\mingw64\\bin\\gcc.exe",
       "includePath": [
         "${workspaceFolder}\\**",
