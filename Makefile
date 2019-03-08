@@ -1,5 +1,6 @@
 # Flags
 CC = gcc
+AR = ar
 CFLAGS = -g #-D __CHELPDEBUG__
 CPPFLAGS = -std=gnu99 -Wall -Wextra -pedantic
 
@@ -87,7 +88,7 @@ $(OBJ_DIR)/test_%.o: $(TEST_DIR)/%.c
 # linking rules
 $(LIBCHELPER): $(CHELPER_OBJS) $(CHELPER_INTERNAL_OBJS)
 	@echo "ar $@"
-	@ar rcs $@ $^
+	@$(AR) rcs $@ $^
 	@echo ""
 
 $(BIN_DIR)/test_%: $(OBJ_DIR)/test_%.o $(LIBCHELPER)
