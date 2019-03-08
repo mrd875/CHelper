@@ -5,8 +5,8 @@ CPPFLAGS = -std=gnu99 -Wall -Wextra -pedantic
 
 
 # Setup dirs
-BUILD_DIR = build
-SRC_DIR = src
+BUILD_DIR = ./build
+SRC_DIR = ./src
 BIN_DIR = $(BUILD_DIR)/bin
 LIB_DIR = $(BUILD_DIR)/lib
 OBJ_DIR = $(BUILD_DIR)/obj
