@@ -342,6 +342,25 @@ double _DictionaryGetLoadFactor(Dictionary d)
     return (double)d->length / (double)d->size;
 }
 
+bool DictionaryRemoveNoFree(Dictionary d, String key)
+{
+    bool o;
+    free_fn_t free_fn;
+
+    assert(d != NULL);
+    assert(key != NULL);
+
+    free_fn = d->free_fn;
+
+    d->free_fn = NULL;
+
+    o = DictionaryRemove(d, key);
+
+    d->free_fn = free_fn;
+
+    return o;
+}
+
 bool DictionaryRemove(Dictionary d, String key)
 {
     ArrayList l;

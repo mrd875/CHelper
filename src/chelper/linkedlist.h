@@ -194,4 +194,13 @@ void FreeLinkedList(void *a);
 /*Copy list*/
 void *CopyLinkedList(void *a);
 
+/*Removes the item at the cursor, doesnt free the data*/
+bool LinkedListCursorRemoveNoFree(LinkedList l);
+
+/*Removes last item, no free*/
+bool LinkedListRemoveNoFree(LinkedList l);
+
+/*Removes x item, no free*/
+bool LinkedListRemoveXNoFree(LinkedList l, size_t x);
+
 #endif /* __CHELPERDICT__ */

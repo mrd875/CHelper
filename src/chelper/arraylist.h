@@ -194,4 +194,13 @@ void FreeArrayList(void *a);
 /*Copy list*/
 void *CopyArrayList(void *a);
 
+/*Removes the item at the cursor, doesnt free the data*/
+bool ArrayListCursorRemoveNoFree(ArrayList l);
+
+/*Removes last item, no free*/
+bool ArrayListRemoveNoFree(ArrayList l);
+
+/*Removes x item, no free*/
+bool ArrayListRemoveXNoFree(ArrayList l, size_t x);
+
 #endif /* __CHELPERDICT__ */

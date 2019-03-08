@@ -187,6 +187,24 @@ int _HeapNextChild(HeapNode *arr, size_t node, size_t hsize, bool rev)
     return (int)right;
 }
 
+bool HeapRemoveNoFree(Heap h)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(h != NULL);
+
+    free_fn = h->free_fn;
+
+    h->free_fn = NULL;
+
+    o = HeapRemove(h);
+
+    h->free_fn = free_fn;
+
+    return o;
+}
+
 bool HeapRemove(Heap h)
 {
     size_t remove, last;

@@ -82,4 +82,7 @@ void FreeDictionary(void *d);
 /*Copy dict*/
 void *CopyDictionary(void *d);
 
+/*Removes the key, no free*/
+bool DictionaryRemoveNoFree(Dictionary d, String key);
+
 #endif /* __CHELPERDICT__ */

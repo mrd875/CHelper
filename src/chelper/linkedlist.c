@@ -1164,6 +1164,61 @@ bool LinkedListCursorRemove(LinkedList l)
     return LinkedListNodeRemove(l->cursor.current);
 }
 
+bool LinkedListRemoveXNoFree(LinkedList l, size_t x)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(l != NULL);
+
+    free_fn = l->free_fn;
+
+    l->free_fn = NULL;
+
+    o = LinkedListRemoveX(l, x);
+
+    l->free_fn = free_fn;
+
+    return o;
+}
+
+bool LinkedListRemoveNoFree(LinkedList l)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(l != NULL);
+
+    free_fn = l->free_fn;
+
+    l->free_fn = NULL;
+
+    o = LinkedListRemove(l);
+
+    l->free_fn = free_fn;
+
+    return o;
+}
+
+bool LinkedListCursorRemoveNoFree(LinkedList l)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(l != NULL);
+    assert(LinkedListCursorIsNull(l) != true);
+
+    free_fn = l->free_fn;
+
+    l->free_fn = NULL;
+
+    o = LinkedListCursorRemove(l);
+
+    l->free_fn = free_fn;
+
+    return o;
+}
+
 int LinkedListCursorIndexOf(LinkedList l)
 {
     int i;

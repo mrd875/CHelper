@@ -41,4 +41,7 @@ bool HeapAdd(Heap h, int key, void *data);
 /*Returns an array of all the elements heap sorted copied.*/
 ArrayList HeapToArrayList(Heap h);
 
+/*Removes from heap, no free*/
+bool HeapRemoveNoFree(Heap h);
+
 #endif /* __CHELPERHEAP__ */

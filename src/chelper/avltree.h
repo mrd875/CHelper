@@ -40,4 +40,7 @@ void AVLTreeInorderForEach(AVLTree t, foreach_fn_t foreach_fn);
 /*Prints the tree's keys*/
 void AVLTreePrintKeys(AVLTree t);
 
+/*Removes the key from the tree, no free data*/
+bool AVLTreeRemoveNoFree(AVLTree t, int key);
+
 #endif /* __CHELPERAVL__ */

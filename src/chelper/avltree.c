@@ -406,6 +406,24 @@ bool AVLTreeRemove(AVLTree t, int key)
     return true;
 }
 
+bool AVLTreeRemoveNoFree(AVLTree t, int key)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(t != NULL);
+
+    free_fn = t->free_fn;
+
+    t->free_fn = NULL;
+
+    o = AVLTreeRemove(t, key);
+
+    t->free_fn = free_fn;
+
+    return o;
+}
+
 /*Does recursively inorder.*/
 size_t AVLTreeNodeInorderForEach(AVLTreeNode n, foreach_fn_t foreach_fn, size_t i)
 {

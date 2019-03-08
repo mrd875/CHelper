@@ -355,6 +355,42 @@ bool ArrayListRemove(ArrayList l)
     return ArrayListRemoveX(l, ArrayListLength(l) - 1);
 }
 
+bool ArrayListRemoveXNoFree(ArrayList l, size_t x)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(l != NULL);
+
+    free_fn = l->free_fn;
+
+    l->free_fn = NULL;
+
+    o = ArrayListRemoveX(l, x);
+
+    l->free_fn = free_fn;
+
+    return o;
+}
+
+bool ArrayListRemoveNoFree(ArrayList l)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(l != NULL);
+
+    free_fn = l->free_fn;
+
+    l->free_fn = NULL;
+
+    o = ArrayListRemove(l);
+
+    l->free_fn = free_fn;
+
+    return o;
+}
+
 void *ArrayListGet(ArrayList l)
 {
     assert(l != NULL);
@@ -784,6 +820,25 @@ bool ArrayListCursorRemove(ArrayList l)
     assert(ArrayListCursorIsNull(l) != true);
 
     return ArrayListRemoveX(l, l->cursor);
+}
+
+bool ArrayListCursorRemoveNoFree(ArrayList l)
+{
+    free_fn_t free_fn;
+    bool o;
+
+    assert(l != NULL);
+    assert(ArrayListCursorIsNull(l) != true);
+
+    free_fn = l->free_fn;
+
+    l->free_fn = NULL;
+
+    o = ArrayListCursorRemove(l);
+
+    l->free_fn = free_fn;
+
+    return o;
 }
 
 int ArrayListCursorIndexOf(ArrayList l)
