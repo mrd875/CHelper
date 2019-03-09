@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "../chelper/common.h"
-#include "../chelper/queue.h"
+#include <chelper/common.h>
+#include <chelper/queue.h>
 
 void fail(String src)
 {

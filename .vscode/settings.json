@@ -4,6 +4,7 @@
         "string.h": "c",
         "arraylist.h": "c",
         "stdlib.h": "c",
-        "chrono": "c"
+        "chrono": "c",
+        "common.h": "c"
     }
 }

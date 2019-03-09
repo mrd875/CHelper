@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "../chelper/common.h"
-#include "../chelper/arraylist.h"
-#include "../chelper/dictionary.h"
-#include "../chelper/string.h"
+#include <chelper/common.h>
+#include <chelper/arraylist.h>
+#include <chelper/dictionary.h>
+#include <chelper/string.h>
 
 void fail(String src)
 {

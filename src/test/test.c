@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "../chelper/common.h"
+#include <chelper/common.h>
 
 void fail(String src)
 {
