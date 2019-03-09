@@ -7,6 +7,7 @@
 #include "arraylist.h"
 #include "common.h"
 #include "internal/common.h"
+#include "internal/arraylist.h"
 #include "string.h"
 
 struct Stack
@@ -15,29 +16,81 @@ struct Stack
     ArrayList data;
 };
 
-/*Creates a new Stack*/
-Stack StackCreate(free_fn_t free_fn, copy_fn_t copy_fn);
+Stack StackCreate(free_fn_t free_fn, copy_fn_t copy_fn)
+{
+    Stack s;
 
-/* Copies the Stack. */
-Stack StackCopy(Stack h);
+    s = malloc(sizeof(struct Stack));
+    assert(s != NULL);
 
-/*Frees the Stack*/
-void StackFree(Stack h);
+    s->data = ArrayListCreate(0, free_fn, copy_fn);
 
-/*CLears the Stack*/
-void StackClear(Stack h);
+    return s;
+}
 
-/*Gets the amount of elements in the Stack.*/
-size_t StackLength(Stack h);
+Stack StackCopy(Stack h)
+{
+    Stack s;
 
-/*Gets the item in the Stack*/
-void *StackGet(Stack h);
+    assert(h != NULL);
 
-/*Removes the item from the Stack*/
-bool StackRemove(Stack h);
+    s = StackCreate(ArrayListGetFreeFn(h->data), ArrayListGetCopyFn(h->data));
+    ArrayListFree(s->data);
 
-/*Adds the item to the Stack*/
-bool StackAdd(Stack h, void *data);
+    s->data = ArrayListCopy(h->data);
 
-/*Removes from Stack, no free*/
-bool StackRemoveNoFree(Stack h);
+    return s;
+}
+
+void StackFree(Stack h)
+{
+    assert(h != NULL);
+
+    StackClear(h);
+
+    ArrayListFree(h->data);
+
+    free(h);
+}
+
+void StackClear(Stack h)
+{
+    assert(h != NULL);
+
+    ArrayListClear(h->data);
+}
+
+size_t StackLength(Stack h)
+{
+    assert(h != NULL);
+
+    return ArrayListLength(h->data);
+}
+
+void *StackGet(Stack h)
+{
+    assert(h != NULL);
+
+    return ArrayListGet(h->data);
+}
+
+bool StackRemove(Stack h)
+{
+    assert(h != NULL);
+
+    return ArrayListRemove(h->data);
+}
+
+bool StackAdd(Stack h, void *data)
+{
+    assert(h != NULL);
+
+    return ArrayListAdd(h->data, data);
+}
+
+bool StackRemoveNoFree(Stack h)
+{
+    assert(h != NULL);
+
+    return ArrayListRemoveNoFree(h->data);
+}

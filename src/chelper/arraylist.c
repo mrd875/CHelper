@@ -391,6 +391,20 @@ bool ArrayListRemoveNoFree(ArrayList l)
     return o;
 }
 
+free_fn_t ArrayListGetFreeFn(ArrayList l)
+{
+    assert(l != NULL);
+
+    return l->free_fn;
+}
+
+copy_fn_t ArrayListGetCopyFn(ArrayList l)
+{
+    assert(l != NULL);
+
+    return l->copy_fn;
+}
+
 void *ArrayListGet(ArrayList l)
 {
     assert(l != NULL);
