@@ -289,10 +289,11 @@ bool StringEndsWith(String src, String what)
 
 unsigned long StringHash(String str)
 {
+    int c;
+    unsigned long hash;
     assert(str != NULL);
 
-    unsigned long hash = 5381;
-    int c;
+    hash = 5381;
 
     while ((c = *str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */

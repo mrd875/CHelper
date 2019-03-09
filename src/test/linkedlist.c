@@ -140,7 +140,7 @@ int main(void)
         temp = StringFormat("%d ", i);
         build = StringAdd(build, temp);
         free(temp);
-        //printf("Adding %d...\n", i);
+        /*printf("Adding %d...\n", i);*/
 
         LinkedListAdd(l, IntCopy(i));
         EnsureSize(l, size);
@@ -153,7 +153,7 @@ int main(void)
         temp = StringFormat("%d ", *(int *)LinkedListGet(l));
         build = StringChop(build, strlen(temp));
         free(temp);
-        //printf("Removing %d...\n", *(int *)LinkedListGet(l));
+        /*printf("Removing %d...\n", *(int *)LinkedListGet(l));*/
 
         LinkedListRemove(l);
         EnsureSize(l, size);

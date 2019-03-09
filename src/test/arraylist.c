@@ -140,7 +140,7 @@ int main(void)
         temp = StringFormat("%d ", i);
         build = StringAdd(build, temp);
         free(temp);
-        //printf("Adding %d...\n", i);
+        /*printf("Adding %d...\n", i);*/
 
         ArrayListAdd(l, IntCopy(i));
         EnsureSize(l, size);
@@ -153,7 +153,7 @@ int main(void)
         temp = StringFormat("%d ", *(int *)ArrayListGet(l));
         build = StringChop(build, strlen(temp));
         free(temp);
-        //printf("Removing %d...\n", *(int *)ArrayListGet(l));
+        /*printf("Removing %d...\n", *(int *)ArrayListGet(l));*/
 
         ArrayListRemove(l);
         EnsureSize(l, size);
