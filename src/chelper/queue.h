@@ -33,7 +33,7 @@ void *QueueGet(Queue h);
 bool QueueRemove(Queue h);
 
 /*Adds the item to the Queue*/
-bool QueueAdd(Queue h, int key, void *data);
+bool QueueAdd(Queue h, void *data);
 
 /*Removes from Queue, no free*/
 bool QueueRemoveNoFree(Queue h);

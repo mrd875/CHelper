@@ -49,21 +49,18 @@ clean-all: clean-binary clean
 
 # src dirs
 CHELPER_DIR = $(SRC_DIR)/chelper
-CHELPER_INTERNAL_DIR = $(CHELPER_DIR)/internal
 
 TEST_DIR = $(SRC_DIR)/test
 
 
 # src lists
 CHELPER_SOURCES = $(wildcard $(CHELPER_DIR)/*.c)
-CHELPER_INTERNAL_SOURCES = $(wildcard $(CHELPER_INTERNAL_DIR)/*.c)
 
 TEST_SOURCES = $(wildcard $(TEST_DIR)/*.c)
 
 
 # obj lists
 CHELPER_OBJS = $(patsubst $(CHELPER_DIR)/%.c, $(OBJ_DIR)/chelper_%.o, $(CHELPER_SOURCES))
-CHELPER_INTERNAL_OBJS = $(patsubst $(CHELPER_INTERNAL_DIR)/%.c, $(OBJ_DIR)/chelper_internal_%.o, $(CHELPER_INTERNAL_SOURCES))
 
 
 # test binarys
@@ -76,17 +73,13 @@ $(OBJ_DIR)/chelper_%.o: $(CHELPER_DIR)/%.c
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
-$(OBJ_DIR)/chelper_internal_%.o: $(CHELPER_INTERNAL_DIR)/%.c
-	@echo "$(CC) $@"
-	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
-
 $(OBJ_DIR)/test_%.o: $(TEST_DIR)/%.c
 	@echo "$(CC) $@"
 	@$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $<
 
 
 # linking rules
-$(LIBCHELPER): $(CHELPER_OBJS) $(CHELPER_INTERNAL_OBJS)
+$(LIBCHELPER): $(CHELPER_OBJS)
 	@echo "ar $@"
 	@$(AR) rcs $@ $^
 	@echo ""

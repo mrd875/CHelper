@@ -33,7 +33,7 @@ void *StackGet(Stack h);
 bool StackRemove(Stack h);
 
 /*Adds the item to the Stack*/
-bool StackAdd(Stack h, int key, void *data);
+bool StackAdd(Stack h, void *data);
 
 /*Removes from Stack, no free*/
 bool StackRemoveNoFree(Stack h);
