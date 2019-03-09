@@ -16,6 +16,27 @@ void fail(String src)
 
 int main(void)
 {
+    Queue s;
+
+    s = QueueCreate(&free, &CopyInt);
+
+    printf("adding 1 .. 6\n");
+    QueueAdd(s, IntCopy(1));
+    QueueAdd(s, IntCopy(2));
+    QueueAdd(s, IntCopy(3));
+    QueueAdd(s, IntCopy(4));
+    QueueAdd(s, IntCopy(5));
+    QueueAdd(s, IntCopy(6));
+
+    while (QueueLength(s))
+    {
+        printf("%d ", *(int *)QueueGet(s));
+
+        QueueRemove(s);
+    }
+    printf("\n");
+
+    QueueFree(s);
 
     printf("COMPLETED TESTS\n");
 
