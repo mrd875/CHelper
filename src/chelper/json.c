@@ -9,6 +9,7 @@
 #include "string.h"
 #include "dictionary.h"
 #include "arraylist.h"
+#include "stringbuilder.h"
 
 struct JSON
 {
@@ -106,6 +107,76 @@ void *JSONVCopy(void *a)
     return an;
 }
 
+JSONValue JSONValueBool(bool in)
+{
+    JSONValue jv;
+
+    jv.type = JSON_Bool;
+    jv.data = IntCopy(in);
+
+    return jv;
+}
+
+JSONValue JSONValueInt(int in)
+{
+    JSONValue jv;
+
+    jv.type = JSON_Int;
+    jv.data = IntCopy(in);
+
+    return jv;
+}
+
+JSONValue JSONValueFloat(float in)
+{
+    JSONValue jv;
+
+    jv.type = JSON_Float;
+    jv.data = FloatCopy(in);
+
+    return jv;
+}
+
+JSONValue JSONValueNull()
+{
+    JSONValue jv;
+
+    jv.type = JSON_Null;
+    jv.data = NULL;
+
+    return jv;
+}
+
+JSONValue JSONValueString(String s)
+{
+    JSONValue jv;
+
+    jv.type = JSON_String;
+    jv.data = StringCopy(s);
+
+    return jv;
+}
+
+JSONValue JSONValueObject(JSON j)
+{
+    JSONValue jv;
+
+    jv.type = JSON_Object;
+    jv.data = j;
+
+    return jv;
+}
+
+JSONValue JSONValueArray(JSONArray j)
+{
+    JSONValue jv;
+
+    jv.type = JSON_Array;
+    jv.data = j;
+
+    return jv;
+}
+
 JSON JSONCreate()
 {
     JSON j;
@@ -170,38 +241,188 @@ JSONValue JSONGet(JSON j, String k)
     return jv;
 }
 
-/*Sets the key in the json*/
-bool JSONSet(JSON j, String k, JSONValue v);
+bool JSONSet(JSON j, String k, JSONValue v)
+{
+    assert(j);
+    assert(k);
 
-/*Does the json object have the key*/
-bool JSONHas(JSON j, String k);
+    return DictionarySet(j->data, k, JSONVCreate(v.type, v.data));
+}
 
-/*Removes the key from the json object*/
-bool JSONRemove(JSON j, String k);
+bool JSONHas(JSON j, String k)
+{
+    assert(j);
+    assert(k);
 
-/*Creates an empty json array*/
-JSONArray JSONArrayCreate();
+    return DictionaryHas(j->data, k);
+}
+
+bool JSONRemove(JSON j, String k)
+{
+    assert(j);
+    assert(k);
+
+    return DictionaryRemove(j->data, k);
+}
+
+JSONArray JSONArrayCreate()
+{
+    JSONArray ja;
+
+    ja = malloc(sizeof(struct JSONArray));
+    assert(ja);
+
+    ja->data = ArrayListCreate(0, &JSONVFree, &JSONVCopy);
+
+    return ja;
+}
 
 /*Creates a json array from a string, null if failed*/
 JSONArray JSONArrayFromString(String str);
 
-/*Frees the json array*/
-void JSONArrayFree(JSONArray ja);
-
-/*Copies the json array*/
-JSONArray JSONArrayCopy(JSONArray ja);
-
 /*Strings the jsonarray*/
-String JSONArrayToString(JSONArray ja);
+String JSONArrayToString(JSONArray ja)
+{
+    String a, temp;
+    StringBuilder sb;
+    size_t len, i;
+    JSONValue jv;
 
-/*How many elements in the array*/
-size_t JSONArrayLength(JSONArray ja);
+    sb = StringBuilderCreate();
+    StringBuilderAdd(sb, "[");
 
-/*Gets the value at the index*/
-JSONValue JSONArrayGet(JSONArray ja, size_t i);
+    len = ArrayListLength(ja->data);
 
-/*Sets the value at the index, fills inbetween with null if needed.*/
-bool JSONArraySet(JSONArray ja, size_t i, JSONValue jv);
+    for (i = 0; i < len; i++)
+    {
+        jv = JSONArrayGet(ja, i);
 
-/*Removes the value at i */
-bool JSONArrayRemove(JSONArray ja, size_t i);
+        switch (jv.type)
+        {
+        case JSON_Null:
+            StringBuilderAdd(sb, "null");
+            break;
+
+        case JSON_Bool:
+            if (*(int *)jv.data)
+                StringBuilderAdd(sb, "true");
+            else
+                StringBuilderAdd(sb, "false");
+            break;
+
+        case JSON_String:
+            StringBuilderAdd(sb, jv.data);
+            break;
+
+        case JSON_Int:
+            StringBuilderAddFormatted(sb, "%d", *(int *)jv.data);
+            break;
+
+        case JSON_Float:
+            StringBuilderAddFormatted(sb, "%f", *(float *)jv.data);
+            break;
+
+        case JSON_Array:
+            temp = JSONArrayToString(jv.data);
+            StringBuilderAdd(sb, temp);
+            free(temp);
+            break;
+
+        case JSON_Object:
+            //temp = JSONToString(jv.data);
+            StringBuilderAdd(sb, temp);
+            free(temp);
+            break;
+
+        default:
+            break;
+        }
+
+        if (i < len - 1)
+            StringBuilderAdd(sb, ",");
+    }
+
+    StringBuilderAdd(sb, "]");
+
+    a = StringBuilderToString(sb);
+    StringBuilderFree(sb);
+
+    return a;
+}
+
+void JSONArrayFree(JSONArray ja)
+{
+    assert(ja);
+
+    ArrayListFree(ja->data);
+
+    free(ja);
+}
+
+JSONArray JSONArrayCopy(JSONArray ja)
+{
+    JSONArray a;
+
+    assert(ja);
+
+    a = JSONArrayCreate();
+    ArrayListFree(a->data);
+
+    a->data = ArrayListCopy(ja->data);
+
+    return a;
+}
+
+size_t JSONArrayLength(JSONArray ja)
+{
+    assert(ja);
+
+    return ArrayListLength(ja->data);
+}
+
+JSONValue JSONArrayGet(JSONArray ja, size_t i)
+{
+    JSONValue jv, *a;
+    size_t len;
+    assert(ja);
+
+    len = ArrayListLength(ja->data);
+
+    if (i >= len)
+    {
+        jv.type = JSON_Null;
+        jv.data = NULL;
+    }
+    else
+    {
+        a = (JSONValue *)ArrayListGetX(ja->data, i);
+
+        jv.data = a->data;
+        jv.type = a->type;
+    }
+
+    return jv;
+}
+
+bool JSONArraySet(JSONArray ja, size_t x, JSONValue jv)
+{
+    size_t len, i;
+
+    assert(ja);
+
+    len = ArrayListLength(ja->data);
+
+    for (i = len; i <= x; i++)
+    {
+        ArrayListAdd(ja->data, JSONVCreate(JSON_Null, NULL));
+    }
+
+    return ArrayListSetX(ja->data, JSONVCreate(jv.type, jv.data), x);
+}
+
+bool JSONArrayRemove(JSONArray ja, size_t i)
+{
+    assert(ja);
+
+    return ArrayListRemoveX(ja->data, i);
+}

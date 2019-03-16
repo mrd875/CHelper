@@ -5,6 +5,7 @@
         "arraylist.h": "c",
         "stdlib.h": "c",
         "chrono": "c",
-        "common.h": "c"
+        "common.h": "c",
+        "json.h": "c"
     }
 }

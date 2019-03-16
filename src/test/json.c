@@ -5,6 +5,8 @@
 #include <assert.h>
 
 #include <chelper/common.h>
+#include <chelper/json.h>
+#include <chelper/string.h>
 
 void fail(String src)
 {
@@ -15,6 +17,24 @@ void fail(String src)
 
 int main(void)
 {
+    JSONArray ja, ja2;
+    String json;
+
+    ja = JSONArrayCreate();
+    ja2 = JSONArrayCreate();
+
+    JSONArraySet(ja, 2, JSONValueBool(false));
+    JSONArraySet(ja, 4, JSONValueBool(false));
+
+    JSONArraySet(ja2, 1, JSONValueBool(false));
+
+    JSONArraySet(ja, 0, JSONValueArray(ja2));
+
+    json = JSONArrayToString(ja);
+    printf("%s\n", json);
+    free(json);
+
+    JSONArrayFree(ja);
 
     printf("COMPLETED TESTS\n");
 

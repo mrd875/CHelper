@@ -10,9 +10,6 @@ typedef struct JSON *JSON;
 /*THis is an array of json values*/
 typedef struct JSONArray *JSONArray;
 
-/*Every type of a json value*/
-typedef enum JSONType JSONType;
-
 enum JSONType
 {
     JSON_Bool,
@@ -23,6 +20,9 @@ enum JSONType
     JSON_Object,
     JSON_Array
 };
+
+/*Every type of a json value*/
+typedef enum JSONType JSONType;
 
 /*The value at a key in the json object*/
 typedef struct JSONValue JSONValue;
@@ -35,6 +35,27 @@ struct JSONValue
 
 #include "common.h"
 #include "string.h"
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueBool(bool in);
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueInt(int in);
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueFloat(float in);
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueNull();
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueString(String in);
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueObject(JSON in);
+
+/*Returns a jsonvalue object*/
+JSONValue JSONValueArray(JSONArray in);
 
 /*Creates a new empty json object*/
 JSON JSONCreate();
