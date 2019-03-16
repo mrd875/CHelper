@@ -57,6 +57,12 @@ JSONValue JSONValueObject(JSON in);
 /*Returns a jsonvalue object*/
 JSONValue JSONValueArray(JSONArray in);
 
+/*Parses the string into a JSON object, returns null if cannot be done.*/
+JSONValue JSONParse(String str);
+
+/*Stringifies the json object*/
+String JSONStringify(JSONValue jv);
+
 /*Creates a new empty json object*/
 JSON JSONCreate();
 
@@ -65,12 +71,6 @@ void JSONFree(JSON j);
 
 /*Copy json object*/
 JSON JSONCopy(JSON j);
-
-/*Parses the string into a JSON object, returns null if cannot be done.*/
-JSON JSONFromString(String str);
-
-/*Stringifies the json object*/
-String JSONToString(JSON j);
 
 /*Gets the json value at the key in the json object*/
 JSONValue JSONGet(JSON j, String k);
@@ -87,17 +87,11 @@ bool JSONRemove(JSON j, String k);
 /*Creates an empty json array*/
 JSONArray JSONArrayCreate();
 
-/*Creates a json array from a string, null if failed*/
-JSONArray JSONArrayFromString(String str);
-
 /*Frees the json array*/
 void JSONArrayFree(JSONArray ja);
 
 /*Copies the json array*/
 JSONArray JSONArrayCopy(JSONArray ja);
-
-/*Strings the jsonarray*/
-String JSONArrayToString(JSONArray ja);
 
 /*How many elements in the array*/
 size_t JSONArrayLength(JSONArray ja);

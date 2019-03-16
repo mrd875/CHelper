@@ -23,6 +23,7 @@ struct JSONArray
     ArrayList data;
 };
 
+/*Creates the json value*/
 JSONValue *JSONVCreate(JSONType jt, void *data)
 {
     JSONValue *a;
@@ -35,6 +36,7 @@ JSONValue *JSONVCreate(JSONType jt, void *data)
     return a;
 }
 
+/*Frees the jsv*/
 void JSONVFree(void *a)
 {
     JSONValue *jv;
@@ -63,6 +65,7 @@ void JSONVFree(void *a)
     free(jv);
 }
 
+/*Copy the jsv*/
 void *JSONVCopy(void *a)
 {
     JSONValue *jv, *an;
@@ -212,12 +215,6 @@ JSON JSONCopy(JSON j)
     return a;
 }
 
-/*Parses the string into a JSON object, returns null if cannot be done.*/
-JSON JSONFromString(String str);
-
-/*Stringifies the json object*/
-String JSONToString(JSON j);
-
 JSONValue JSONGet(JSON j, String k)
 {
     JSONValue jv, *a;
@@ -275,79 +272,6 @@ JSONArray JSONArrayCreate()
     ja->data = ArrayListCreate(0, &JSONVFree, &JSONVCopy);
 
     return ja;
-}
-
-/*Creates a json array from a string, null if failed*/
-JSONArray JSONArrayFromString(String str);
-
-/*Strings the jsonarray*/
-String JSONArrayToString(JSONArray ja)
-{
-    String a, temp;
-    StringBuilder sb;
-    size_t len, i;
-    JSONValue jv;
-
-    sb = StringBuilderCreate();
-    StringBuilderAdd(sb, "[");
-
-    len = ArrayListLength(ja->data);
-
-    for (i = 0; i < len; i++)
-    {
-        jv = JSONArrayGet(ja, i);
-
-        switch (jv.type)
-        {
-        case JSON_Null:
-            StringBuilderAdd(sb, "null");
-            break;
-
-        case JSON_Bool:
-            if (*(int *)jv.data)
-                StringBuilderAdd(sb, "true");
-            else
-                StringBuilderAdd(sb, "false");
-            break;
-
-        case JSON_String:
-            StringBuilderAdd(sb, jv.data);
-            break;
-
-        case JSON_Int:
-            StringBuilderAddFormatted(sb, "%d", *(int *)jv.data);
-            break;
-
-        case JSON_Float:
-            StringBuilderAddFormatted(sb, "%f", *(float *)jv.data);
-            break;
-
-        case JSON_Array:
-            temp = JSONArrayToString(jv.data);
-            StringBuilderAdd(sb, temp);
-            free(temp);
-            break;
-
-        case JSON_Object:
-            //temp = JSONToString(jv.data);
-            StringBuilderAdd(sb, temp);
-            free(temp);
-            break;
-
-        default:
-            break;
-        }
-
-        if (i < len - 1)
-            StringBuilderAdd(sb, ",");
-    }
-
-    StringBuilderAdd(sb, "]");
-
-    a = StringBuilderToString(sb);
-    StringBuilderFree(sb);
-
-    return a;
 }
 
 void JSONArrayFree(JSONArray ja)
@@ -426,3 +350,145 @@ bool JSONArrayRemove(JSONArray ja, size_t i)
 
     return ArrayListRemoveX(ja->data, i);
 }
+
+/*Adds the value to sb*/
+void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv);
+
+/*Strings the jsonarray*/
+String JSONArrayToString(JSONArray ja)
+{
+    String a;
+    StringBuilder sb;
+    size_t len, i;
+    JSONValue jv;
+
+    sb = StringBuilderCreate();
+    StringBuilderAdd(sb, "[");
+
+    len = ArrayListLength(ja->data);
+
+    for (i = 0; i < len; i++)
+    {
+        jv = JSONArrayGet(ja, i);
+
+        JSONValueAddToStringBuilder(sb, jv);
+
+        if (i < len - 1)
+            StringBuilderAdd(sb, ",");
+    }
+
+    StringBuilderAdd(sb, "]");
+
+    a = StringBuilderToString(sb);
+    StringBuilderFree(sb);
+
+    return a;
+}
+
+/*Stringifies the json object*/
+String JSONToString(JSON j)
+{
+    String a, temp;
+    StringBuilder sb;
+    size_t len, i;
+    JSONValue jv;
+    ArrayList keys;
+
+    sb = StringBuilderCreate();
+    StringBuilderAdd(sb, "{");
+
+    keys = DictionaryKeys(j->data);
+    len = ArrayListLength(keys);
+
+    for (i = 0; i < len; i++)
+    {
+        temp = (String)ArrayListGetX(keys, i);
+
+        jv = JSONGet(j, temp);
+
+        StringBuilderAddFormatted(sb, "\"%s\":", temp);
+
+        JSONValueAddToStringBuilder(sb, jv);
+
+        if (i < len - 1)
+            StringBuilderAdd(sb, ",");
+    }
+
+    StringBuilderAdd(sb, "}");
+
+    a = StringBuilderToString(sb);
+    StringBuilderFree(sb);
+    ArrayListFree(keys);
+
+    return a;
+}
+
+String JSONStringify(JSONValue jv)
+{
+    switch (jv.type)
+    {
+    case JSON_Array:
+        return JSONArrayToString(jv.data);
+
+    case JSON_Object:
+        return JSONToString(jv.data);
+
+    default:
+        return NULL;
+    }
+}
+
+void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv)
+{
+    String temp;
+
+    switch (jv.type)
+    {
+    case JSON_Null:
+        StringBuilderAdd(sb, "null");
+        break;
+
+    case JSON_Bool:
+        if (*(int *)jv.data)
+            StringBuilderAdd(sb, "true");
+        else
+            StringBuilderAdd(sb, "false");
+        break;
+
+    case JSON_String:
+        StringBuilderAddFormatted(sb, "\"%s\"", jv.data);
+        break;
+
+    case JSON_Int:
+        StringBuilderAddFormatted(sb, "%d", *(int *)jv.data);
+        break;
+
+    case JSON_Float:
+        StringBuilderAddFormatted(sb, "%f", *(float *)jv.data);
+        break;
+
+    case JSON_Array:
+        temp = JSONArrayToString(jv.data);
+        StringBuilderAdd(sb, temp);
+        free(temp);
+        break;
+
+    case JSON_Object:
+        temp = JSONToString(jv.data);
+        StringBuilderAdd(sb, temp);
+        free(temp);
+        break;
+
+    default:
+        break;
+    }
+}
+
+/*Parses the string into a JSON object, returns null if cannot be done.*/
+JSON JSONFromString(String str);
+
+/*Creates a json array from a string, null if failed*/
+JSONArray JSONArrayFromString(String str);
+
+/*Parses the string into a JSON object, returns null if cannot be done.*/
+JSONValue JSONParse(String str);
