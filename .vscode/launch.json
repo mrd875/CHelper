@@ -19,7 +19,8 @@
         "stack",
         "string",
         "stringbuilder",
-        "test"
+        "test",
+        "json"
       ]
     }
   ],
