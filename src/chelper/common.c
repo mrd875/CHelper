@@ -31,12 +31,34 @@ int *IntCopy(int i)
     return result;
 }
 
+float *FloatCopy(float i)
+{
+    float *result;
+
+    debugp("Creating an float");
+
+    result = malloc(sizeof(float));
+    assert(result != NULL);
+
+    *result = i;
+
+    return result;
+}
+
 void *CopyInt(void *a)
 {
     if (a == NULL)
         return NULL;
 
     return IntCopy(*(int *)a);
+}
+
+void *CopyFloat(void *a)
+{
+    if (a == NULL)
+        return NULL;
+
+    return FloatCopy(*(float *)a);
 }
 
 bool EqualInt(void *a, void *b)

@@ -24,8 +24,16 @@ void PrintError(String calledFrom);
 */
 int *IntCopy(int i);
 
+/*
+    Creates a float. Free afterwards.
+*/
+float *FloatCopy(float i);
+
 /*Copy and int for lists and collections*/
 void *CopyInt(void *a);
+
+/*Copy a float for lists and collections*/
+void *CopyFloat(void *a);
 
 /*Compares the arg for ints.*/
 bool EqualInt(void *a, void *b);
