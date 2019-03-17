@@ -19,6 +19,7 @@ int main(void)
 {
     JSON j, j2;
     JSONArray ja;
+    JSONValue jv;
     String str;
 
     j = JSONCreate();
@@ -51,6 +52,19 @@ int main(void)
     free(str);
 
     JSONFree(j);
+
+    jv = JSONParse("  {   \"key\"  :  [   ]   ,  \"lol  \" : \"jii\"\n\n\n\n\n, \"this is false\": false, \"ok\": true ,  \"ahaha\":null, \"a24\":{ }, \"how\":[true, true, false, [false, [[[[[[]]]]]]]] }  ");
+
+    if (jv.type != JSON_Null)
+    {
+        j = jv.data;
+
+        str = JSONStringify(JSONValueObject(j));
+        printf("\n\n%s\n", str);
+        free(str);
+
+        JSONFree(j);
+    }
 
     printf("COMPLETED TESTS\n");
 

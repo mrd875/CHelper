@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "json.h"
 #include "common.h"
@@ -464,7 +465,7 @@ void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv)
         break;
 
     case JSON_Float:
-        StringBuilderAddFormatted(sb, "%f", *(float *)jv.data);
+        StringBuilderAddFormatted(sb, "%g", *(float *)jv.data);
         break;
 
     case JSON_Array:
@@ -484,11 +485,349 @@ void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv)
     }
 }
 
-/*Parses the string into a JSON object, returns null if cannot be done.*/
-JSON JSONFromString(String str);
+/*white space*/
+bool JSONWhiteSpace(char c)
+{
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
 
-/*Creates a json array from a string, null if failed*/
-JSONArray JSONArrayFromString(String str);
+/*Reads a string*/
+String JSONValueReadString(String str, size_t *readChars)
+{
+    String a;
+    size_t og;
+
+    if (str[*readChars] != '"')
+        return NULL;
+    *readChars += 1;
+
+    og = *readChars;
+
+    while (str[*readChars] != '\0' && str[*readChars] != '"')
+        *readChars += 1;
+
+    if (str[*readChars] != '"')
+        return NULL;
+    *readChars += 1;
+
+    a = calloc(sizeof(char), *readChars - og);
+    assert(a);
+
+    strncpy(a, &str[og], *readChars - og - 1);
+
+    return a;
+}
+
+/*Reads a false value, returns null if failed*/
+int *JSONValueReadFalse(String str, size_t *readChars)
+{
+    if (str[*readChars] != 'f')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 'a')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 'l')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 's')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 'e')
+        return NULL;
+    *readChars += 1;
+
+    return IntCopy(false);
+}
+
+/*Reads a true value, returns null if failed*/
+int *JSONValueReadTrue(String str, size_t *readChars)
+{
+    if (str[*readChars] != 't')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 'r')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 'u')
+        return NULL;
+    *readChars += 1;
+
+    if (str[*readChars] != 'e')
+        return NULL;
+    *readChars += 1;
+
+    return IntCopy(true);
+}
+
+/*Reads a null value, returns false if failed*/
+bool JSONValueReadNull(String str, size_t *readChars)
+{
+    if (str[*readChars] != 'n')
+        return false;
+    *readChars += 1;
+
+    if (str[*readChars] != 'u')
+        return false;
+    *readChars += 1;
+
+    if (str[*readChars] != 'l')
+        return false;
+    *readChars += 1;
+
+    if (str[*readChars] != 'l')
+        return false;
+    *readChars += 1;
+
+    return true;
+}
+
+/*Reads white space, returns false if at end of string*/
+bool JSONValueReadWhiteSpace(String str, size_t *readChars)
+{
+    while (JSONWhiteSpace(str[*readChars]))
+        *readChars += 1;
+
+    return str[*readChars] != '\0';
+}
+
+/*Returns the read value. null if failed*/
+JSONValue *JSONValueReadValue(String str, size_t *readChars);
 
 /*Parses the string into a JSON object, returns null if cannot be done.*/
-JSONValue JSONParse(String str);
+JSON JSONFromString(String str, size_t *readChars)
+{
+    JSONValue *jv;
+    JSON j;
+    String key;
+
+    if (str[*readChars] != '{')
+        return NULL;
+    *readChars += 1;
+
+    j = JSONCreate();
+
+    JSONValueReadWhiteSpace(str, readChars);
+
+    if (str[*readChars] == '}')
+    {
+        *readChars += 1;
+        return j;
+    }
+
+    for (;;)
+    {
+        JSONValueReadWhiteSpace(str, readChars);
+
+        key = JSONValueReadString(str, readChars);
+        if (!key)
+        {
+            JSONFree(j);
+            free(key);
+            return NULL;
+        }
+
+        JSONValueReadWhiteSpace(str, readChars);
+
+        if (str[*readChars] != ':')
+        {
+            JSONFree(j);
+            free(key);
+            return NULL;
+        }
+        *readChars += 1;
+
+        JSONValueReadWhiteSpace(str, readChars);
+
+        jv = JSONValueReadValue(str, readChars);
+
+        if (!jv)
+        {
+            JSONFree(j);
+            free(key);
+            return NULL;
+        }
+
+        DictionarySet(j->data, key, jv);
+
+        free(key);
+
+        JSONValueReadWhiteSpace(str, readChars);
+
+        if (str[*readChars] == ',')
+        {
+            *readChars += 1;
+            continue;
+        }
+
+        break;
+    }
+
+    if (str[*readChars] == '}')
+    {
+        *readChars += 1;
+        return j;
+    }
+
+    JSONFree(j);
+    return NULL;
+}
+
+/*Parses the string into a json array. null if error*/
+JSONArray JSONArrayFromString(String str, size_t *readChars)
+{
+    JSONArray ja;
+    JSONValue *jv;
+
+    if (str[*readChars] != '[')
+        return NULL;
+    *readChars += 1;
+
+    ja = JSONArrayCreate();
+
+    JSONValueReadWhiteSpace(str, readChars);
+
+    if (str[*readChars] == ']')
+    {
+        *readChars += 1;
+        return ja;
+    }
+
+    for (;;)
+    {
+        JSONValueReadWhiteSpace(str, readChars);
+
+        jv = JSONValueReadValue(str, readChars);
+
+        if (!jv)
+        {
+            JSONArrayFree(ja);
+            return NULL;
+        }
+
+        ArrayListAdd(ja->data, jv);
+
+        JSONValueReadWhiteSpace(str, readChars);
+
+        if (str[*readChars] == ',')
+        {
+            *readChars += 1;
+            continue;
+        }
+
+        break;
+    }
+
+    if (str[*readChars] == ']')
+    {
+        *readChars += 1;
+        return ja;
+    }
+
+    JSONArrayFree(ja);
+    return NULL;
+}
+
+JSONValue *JSONValueReadValue(String str, size_t *readChars)
+{
+    JSONValue *jv;
+    char c;
+    void *data;
+
+    jv = NULL;
+    c = str[*readChars];
+
+    switch (c)
+    {
+    case '[':
+        if ((data = JSONArrayFromString(str, readChars)))
+            jv = JSONVCreate(JSON_Array, data);
+        break;
+
+    case '{':
+        if ((data = JSONFromString(str, readChars)))
+            jv = JSONVCreate(JSON_Object, data);
+        break;
+
+    case 't':
+        if ((data = JSONValueReadTrue(str, readChars)))
+            jv = JSONVCreate(JSON_Bool, data);
+        break;
+
+    case 'f':
+        if ((data = JSONValueReadFalse(str, readChars)))
+            jv = JSONVCreate(JSON_Bool, data);
+        break;
+
+    case 'n':
+        if (JSONValueReadNull(str, readChars))
+            jv = JSONVCreate(JSON_Null, NULL);
+        break;
+
+    case '"':
+        if ((data = JSONValueReadString(str, readChars)))
+            jv = JSONVCreate(JSON_String, data);
+        break;
+
+    default:
+        break;
+    }
+
+    return jv;
+}
+
+JSONValue JSONParse(String str)
+{
+    JSONValue jv;
+    void *obj;
+    size_t readChars;
+
+    jv.data = NULL;
+    jv.type = JSON_Null;
+
+    readChars = 0;
+    JSONValueReadWhiteSpace(str, &readChars);
+
+    if (str[readChars] == '{')
+    {
+        obj = JSONFromString(str, &readChars);
+
+        if (obj)
+        {
+            if (JSONValueReadWhiteSpace(str, &readChars))
+            {
+                JSONFree(obj);
+            }
+            else
+            {
+                jv.data = obj;
+                jv.type = JSON_Object;
+            }
+        }
+    }
+    else if (str[readChars] == '[')
+    {
+        obj = JSONArrayFromString(str, &readChars);
+
+        if (obj)
+        {
+            if (JSONValueReadWhiteSpace(str, &readChars))
+            {
+                JSONArrayFree(obj);
+            }
+            else
+            {
+                jv.data = obj;
+                jv.type = JSON_Array;
+            }
+        }
+    }
+
+    return jv;
+}
