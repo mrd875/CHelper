@@ -28,6 +28,9 @@ size_t StringBuilderLength(StringBuilder sb);
 /*Adds the string (copies) to the builder*/
 bool StringBuilderAdd(StringBuilder sb, String s);
 
+/*Adds a char to the builder*/
+bool StringBuilderAddChar(StringBuilder sb, char c);
+
 /*Adds a formatted string.*/
 bool StringBuilderAddFormatted(StringBuilder sb, String fmt, ...);
 

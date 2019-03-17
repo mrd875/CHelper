@@ -97,6 +97,19 @@ bool StringBuilderAdd(StringBuilder sb, String s)
     return true;
 }
 
+bool StringBuilderAddChar(StringBuilder sb, char c)
+{
+    char s[2];
+
+    assert(sb != NULL);
+
+    s[1] = '\0';
+
+    s[0] = c;
+
+    return StringBuilderAdd(sb, s);
+}
+
 bool StringBuilderAddFormatted(StringBuilder sb, String fmt, ...)
 {
     char buff[MAX_STRING_BUFFER + 1];

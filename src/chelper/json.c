@@ -373,7 +373,7 @@ String JSONArrayToString(JSONArray ja)
     JSONValue jv;
 
     sb = StringBuilderCreate();
-    StringBuilderAdd(sb, "[");
+    StringBuilderAddChar(sb, '[');
 
     len = ArrayListLength(ja->data);
 
@@ -384,10 +384,10 @@ String JSONArrayToString(JSONArray ja)
         JSONValueAddToStringBuilder(sb, jv);
 
         if (i < len - 1)
-            StringBuilderAdd(sb, ",");
+            StringBuilderAddChar(sb, ',');
     }
 
-    StringBuilderAdd(sb, "]");
+    StringBuilderAddChar(sb, ']');
 
     a = StringBuilderToString(sb);
     StringBuilderFree(sb);
@@ -398,10 +398,8 @@ String JSONArrayToString(JSONArray ja)
 String JSONUnescape(String str)
 {
     String s, a;
-    char c, c2[2];
+    char c;
     StringBuilder sb;
-
-    c2[1] = '\0';
 
     sb = StringBuilderCreate();
 
@@ -415,43 +413,35 @@ String JSONUnescape(String str)
         case '\\':
         case '/':
         case '"':
-            c2[0] = '\\';
-            StringBuilderAdd(sb, c2);
-            c2[0] = c;
+            StringBuilderAddChar(sb, '\\');
             break;
 
         case '\b':
-            c2[0] = '\\';
-            StringBuilderAdd(sb, c2);
-            c2[0] = 'b';
+            StringBuilderAddChar(sb, '\\');
+            c = 'b';
             break;
         case '\f':
-            c2[0] = '\\';
-            StringBuilderAdd(sb, c2);
-            c2[0] = 'f';
+            StringBuilderAddChar(sb, '\\');
+            c = 'f';
             break;
         case '\n':
-            c2[0] = '\\';
-            StringBuilderAdd(sb, c2);
-            c2[0] = 'n';
+            StringBuilderAddChar(sb, '\\');
+            c = 'n';
             break;
         case '\r':
-            c2[0] = '\\';
-            StringBuilderAdd(sb, c2);
-            c2[0] = 'r';
+            StringBuilderAddChar(sb, '\\');
+            c = 'r';
             break;
         case '\t':
-            c2[0] = '\\';
-            StringBuilderAdd(sb, c2);
-            c2[0] = 't';
+            StringBuilderAddChar(sb, '\\');
+            c = 't';
             break;
 
         default:
-            c2[0] = c;
             break;
         }
 
-        StringBuilderAdd(sb, c2);
+        StringBuilderAddChar(sb, c);
 
         s++;
         c = *s;
@@ -474,7 +464,7 @@ String JSONToString(JSON j)
     ArrayList keys;
 
     sb = StringBuilderCreate();
-    StringBuilderAdd(sb, "{");
+    StringBuilderAddChar(sb, '{');
 
     keys = DictionaryKeys(j->data);
     len = ArrayListLength(keys);
@@ -483,19 +473,20 @@ String JSONToString(JSON j)
     {
         temp = (String)ArrayListGetX(keys, i);
 
+        jv.type = JSON_String;
+        jv.data = temp;
+        JSONValueAddToStringBuilder(sb, jv);
+
+        StringBuilderAddChar(sb, ':');
+
         jv = JSONGet(j, temp);
-
-        temp = JSONUnescape(temp);
-        StringBuilderAddFormatted(sb, "\"%s\":", temp);
-        free(temp);
-
         JSONValueAddToStringBuilder(sb, jv);
 
         if (i < len - 1)
-            StringBuilderAdd(sb, ",");
+            StringBuilderAddChar(sb, ',');
     }
 
-    StringBuilderAdd(sb, "}");
+    StringBuilderAddChar(sb, '}');
 
     a = StringBuilderToString(sb);
     StringBuilderFree(sb);
@@ -537,9 +528,11 @@ void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv)
         break;
 
     case JSON_String:
+        StringBuilderAddChar(sb, '"');
         temp = JSONUnescape(jv.data);
-        StringBuilderAddFormatted(sb, "\"%s\"", temp);
+        StringBuilderAdd(sb, temp);
         free(temp);
+        StringBuilderAddChar(sb, '"');
         break;
 
     case JSON_Int:
@@ -584,9 +577,7 @@ String JSONValueReadString(String str, size_t *readChars)
 {
     String a;
     StringBuilder sb;
-    char c[2];
-
-    c[1] = '\0';
+    char c;
 
     if (str[*readChars] != '"')
         return NULL;
@@ -596,47 +587,43 @@ String JSONValueReadString(String str, size_t *readChars)
 
     while (str[*readChars] != '\0' && str[*readChars] != '"')
     {
-        if (str[*readChars] == '\\')
+        c = str[*readChars];
+
+        if (c == '\\')
         {
             *readChars += 1;
 
-            c[0] = str[*readChars];
+            c = str[*readChars];
 
-            switch (c[0])
+            switch (c)
             {
             case '"':
             case '\\':
             case '/':
                 break;
             case 'b':
-                c[0] = '\b';
+                c = '\b';
                 break;
             case 'f':
-                c[0] = '\f';
+                c = '\f';
                 break;
             case 'n':
-                c[0] = '\n';
+                c = '\n';
                 break;
             case 'r':
-                c[0] = '\r';
+                c = '\r';
                 break;
             case 't':
-                c[0] = '\t';
+                c = '\t';
                 break;
 
             default:
                 StringBuilderFree(sb);
                 return NULL;
             }
-
-            StringBuilderAdd(sb, c);
         }
-        else
-        {
-            c[0] = str[*readChars];
 
-            StringBuilderAdd(sb, c);
-        }
+        StringBuilderAddChar(sb, c);
 
         *readChars += 1;
     }
@@ -876,11 +863,10 @@ JSONValue JSONValueReadNumber(String str, size_t *readChars)
 {
     JSONValue jv;
     String s;
-    char c[2];
+    char c;
     StringBuilder sb;
     bool isfrac;
 
-    c[1] = '\0';
     jv.data = NULL;
     jv.type = JSON_Null;
 
@@ -888,8 +874,8 @@ JSONValue JSONValueReadNumber(String str, size_t *readChars)
 
     if (str[*readChars] == '-')
     {
-        c[0] = str[*readChars];
-        StringBuilderAdd(sb, c);
+        c = str[*readChars];
+        StringBuilderAddChar(sb, c);
 
         *readChars += 1;
     }
@@ -902,8 +888,8 @@ JSONValue JSONValueReadNumber(String str, size_t *readChars)
 
     while (JSONDigit(str[*readChars]))
     {
-        c[0] = str[*readChars];
-        StringBuilderAdd(sb, c);
+        c = str[*readChars];
+        StringBuilderAddChar(sb, c);
 
         *readChars += 1;
     }
@@ -912,8 +898,8 @@ JSONValue JSONValueReadNumber(String str, size_t *readChars)
     if (str[*readChars] == '.')
     {
         isfrac = true;
-        c[0] = str[*readChars];
-        StringBuilderAdd(sb, c);
+        c = str[*readChars];
+        StringBuilderAddChar(sb, c);
 
         *readChars += 1;
 
@@ -925,8 +911,8 @@ JSONValue JSONValueReadNumber(String str, size_t *readChars)
 
         while (JSONDigit(str[*readChars]))
         {
-            c[0] = str[*readChars];
-            StringBuilderAdd(sb, c);
+            c = str[*readChars];
+            StringBuilderAddChar(sb, c);
 
             *readChars += 1;
         }
