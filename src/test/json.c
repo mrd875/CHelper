@@ -27,7 +27,7 @@ int main(void)
     j2 = JSONCreate();
 
     JSONSet(j, "hello", JSONValueBool(true));
-    JSONSet(j, "xd", JSONValueBool(false));
+    JSONSet(j, "x\"d", JSONValueBool(false));
     JSONSet(j, "there", JSONValueArray(ja));
     JSONSet(j, "another", JSONValueObject(j2));
 
@@ -53,7 +53,7 @@ int main(void)
 
     JSONFree(j);
 
-    jv = JSONParse("  {   \"key\"  :  [   ]   ,  \"lol  \" : \"jii\"\n\n\n\n\n, \"this is false\": false, \"ok\": true ,  \"ahaha\":null, \"a24\":{ }, \"how\":[true, true, false, [false, [[[[[[]]]]]]]] }  ");
+    jv = JSONParse("  {  \"99\":-0.56345, \"3\":3 , \"key\"  :  [   ]   ,  \"lol  \" : \"ji\\\"i\"\n\n\n\n\n, \"this is false\": false, \"ok\": true ,  \"ahaha\":null, \"a24\":{ }, \"how\":[true, true, false, [false, [[[[[]]]]]]] }  ");
 
     if (jv.type != JSON_Null)
     {

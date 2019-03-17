@@ -386,6 +386,75 @@ String JSONArrayToString(JSONArray ja)
     return a;
 }
 
+String JSONUnescape(String str)
+{
+    String s, a;
+    char c, c2[2];
+    StringBuilder sb;
+
+    c2[1] = '\0';
+
+    sb = StringBuilderCreate();
+
+    s = str;
+    c = *str;
+
+    while (c != '\0')
+    {
+        switch (c)
+        {
+        case '\\':
+        case '/':
+        case '"':
+            c2[0] = '\\';
+            StringBuilderAdd(sb, c2);
+            c2[0] = c;
+            break;
+
+        case '\b':
+            c2[0] = '\\';
+            StringBuilderAdd(sb, c2);
+            c2[0] = 'b';
+            break;
+        case '\f':
+            c2[0] = '\\';
+            StringBuilderAdd(sb, c2);
+            c2[0] = 'f';
+            break;
+        case '\n':
+            c2[0] = '\\';
+            StringBuilderAdd(sb, c2);
+            c2[0] = 'n';
+            break;
+        case '\r':
+            c2[0] = '\\';
+            StringBuilderAdd(sb, c2);
+            c2[0] = 'r';
+            break;
+        case '\t':
+            c2[0] = '\\';
+            StringBuilderAdd(sb, c2);
+            c2[0] = 't';
+            break;
+
+        default:
+            c2[0] = c;
+            break;
+        }
+
+        StringBuilderAdd(sb, c2);
+
+        s++;
+        c = *s;
+    }
+
+    a = StringBuilderToString(sb);
+
+    StringBuilderFree(sb);
+
+    return a;
+}
+
 /*Stringifies the json object*/
 String JSONToString(JSON j)
 {
@@ -407,7 +476,9 @@ String JSONToString(JSON j)
 
         jv = JSONGet(j, temp);
 
+        temp = JSONUnescape(temp);
         StringBuilderAddFormatted(sb, "\"%s\":", temp);
+        free(temp);
 
         JSONValueAddToStringBuilder(sb, jv);
 
@@ -457,7 +528,9 @@ void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv)
         break;
 
     case JSON_String:
-        StringBuilderAddFormatted(sb, "\"%s\"", jv.data);
+        temp = JSONUnescape(jv.data);
+        StringBuilderAddFormatted(sb, "\"%s\"", temp);
+        free(temp);
         break;
 
     case JSON_Int:
@@ -491,29 +564,84 @@ bool JSONWhiteSpace(char c)
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
+/*digit*/
+bool JSONDigit(char c)
+{
+    return c >= '0' && c <= '9';
+}
+
 /*Reads a string*/
 String JSONValueReadString(String str, size_t *readChars)
 {
     String a;
-    size_t og;
+    StringBuilder sb;
+    char c[2];
+
+    c[1] = '\0';
 
     if (str[*readChars] != '"')
         return NULL;
     *readChars += 1;
 
-    og = *readChars;
+    sb = StringBuilderCreate();
 
     while (str[*readChars] != '\0' && str[*readChars] != '"')
+    {
+        if (str[*readChars] == '\\')
+        {
+            *readChars += 1;
+
+            c[0] = str[*readChars];
+
+            switch (c[0])
+            {
+            case '"':
+            case '\\':
+            case '/':
+                break;
+            case 'b':
+                c[0] = '\b';
+                break;
+            case 'f':
+                c[0] = '\f';
+                break;
+            case 'n':
+                c[0] = '\n';
+                break;
+            case 'r':
+                c[0] = '\r';
+                break;
+            case 't':
+                c[0] = '\t';
+                break;
+
+            default:
+                StringBuilderFree(sb);
+                return NULL;
+            }
+
+            StringBuilderAdd(sb, c);
+        }
+        else
+        {
+            c[0] = str[*readChars];
+
+            StringBuilderAdd(sb, c);
+        }
+
         *readChars += 1;
+    }
 
     if (str[*readChars] != '"')
+    {
+        StringBuilderFree(sb);
         return NULL;
+    }
     *readChars += 1;
 
-    a = calloc(sizeof(char), *readChars - og);
-    assert(a);
+    a = StringBuilderToString(sb);
 
-    strncpy(a, &str[og], *readChars - og - 1);
+    StringBuilderFree(sb);
 
     return a;
 }
@@ -734,9 +862,88 @@ JSONArray JSONArrayFromString(String str, size_t *readChars)
     return NULL;
 }
 
+/*Reads a nubmer*/
+JSONValue JSONValueReadNumber(String str, size_t *readChars)
+{
+    JSONValue jv;
+    String s;
+    char c[2];
+    StringBuilder sb;
+    bool isfrac;
+
+    c[1] = '\0';
+    jv.data = NULL;
+    jv.type = JSON_Null;
+
+    sb = StringBuilderCreate();
+
+    if (str[*readChars] == '-')
+    {
+        c[0] = str[*readChars];
+        StringBuilderAdd(sb, c);
+
+        *readChars += 1;
+    }
+
+    if (!JSONDigit(str[*readChars]))
+    {
+        StringBuilderFree(sb);
+        return jv;
+    }
+
+    while (JSONDigit(str[*readChars]))
+    {
+        c[0] = str[*readChars];
+        StringBuilderAdd(sb, c);
+
+        *readChars += 1;
+    }
+
+    isfrac = false;
+    if (str[*readChars] == '.')
+    {
+        isfrac = true;
+        c[0] = str[*readChars];
+        StringBuilderAdd(sb, c);
+
+        *readChars += 1;
+
+        if (!JSONDigit(str[*readChars]))
+        {
+            StringBuilderFree(sb);
+            return jv;
+        }
+
+        while (JSONDigit(str[*readChars]))
+        {
+            c[0] = str[*readChars];
+            StringBuilderAdd(sb, c);
+
+            *readChars += 1;
+        }
+    }
+
+    s = StringBuilderToString(sb);
+
+    if (isfrac)
+    {
+        jv.type = JSON_Float;
+        jv.data = FloatCopy(atof(s));
+    }
+    else
+    {
+        jv.type = JSON_Int;
+        jv.data = IntCopy(atoi(s));
+    }
+
+    free(s);
+    StringBuilderFree(sb);
+    return jv;
+}
+
 JSONValue *JSONValueReadValue(String str, size_t *readChars)
 {
-    JSONValue *jv;
+    JSONValue *jv, temp;
     char c;
     void *data;
 
@@ -773,6 +980,23 @@ JSONValue *JSONValueReadValue(String str, size_t *readChars)
     case '"':
         if ((data = JSONValueReadString(str, readChars)))
             jv = JSONVCreate(JSON_String, data);
+        break;
+
+    case '-':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+        temp = JSONValueReadNumber(str, readChars);
+
+        if (temp.type != JSON_Null)
+            jv = JSONVCreate(temp.type, temp.data);
         break;
 
     default:
