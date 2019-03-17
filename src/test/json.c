@@ -53,7 +53,7 @@ int main(void)
 
     JSONFree(j);
 
-    jv = JSONParse("  {  \"99\":-0.56345, \"3\":3 , \"key\"  :  [   ]   ,  \"lol  \" : \"ji\\\"i\"\n\n\n\n\n, \"this is false\": false, \"ok\": true ,  \"ahaha\":null, \"a24\":{ }, \"how\":[true, true, false, [false, [[[[[]]]]]]] }  ");
+    jv = JSONParse("  {  \"\\\"escape string\": \"\nnew line\",  \"test_array\": [], \"test_array2\": [  1 , 4,  6, 7 ],   \"test_neg_int\"  : \t  -42  \n  ,   \"test_neg_float\":-39.24,\"bookstore\": {\"book\": [{\"category\": \"cooking\",\"title\": {\"lang\": \"en\",\"text\": \"Everyday Italian\"},\"author\": \"Giada De Laurentiis\",\"year\": 2005,\"price\": 30.00},{\"category\": \"children\",\"title\": {\"lang\": \"en\",\"text\": \"Harry Potter\"},\"author\": \"J K. Rowling\",\"year\": 2005,\"price\": 29.99}]}  \r      }    ");
 
     if (jv.type != JSON_Null)
     {
@@ -65,6 +65,20 @@ int main(void)
 
         JSONFree(j);
     }
+    else
+    {
+        fail("BAD JSON PARSE");
+    }
+
+    jv = JSONParse("  {  \"\\\"escape string\": \"\nnew line\",  \"test_array\": [], \"test_array2\": [  1 , 4,  6, 7 ],   \"test_neg_int\"  : \t  -42  \n  ,   \"test_neg_float\":-39.24,\"bookstore\": {\"book\": [{\"category\": \"cooking\",\"title\": {\"lang\": \"en\",\"text\": \"Everyday Italian\"},\"author\": \"Giada De Laurentiis\",\"year\": 2005,\"price\": 30.00},{\"category\": \"children\",\"title\": {\"lang\": \"en\",\"text\": \"Harry Potter\"},\"author\": \"J K. Rowling\",\"year\": 2005,\"price\": 29.99}]}  \r      }    []");
+
+    if (jv.type != JSON_Null)
+        fail("SHOULD FAIL!");
+
+    jv = JSONParse("  {  \"\\\"escape string\": \"\nnew line\",  \"test_array\": [], \"test_array2\": [  1 , 4,  6, 7 ],   \"test_neg_int\"  : \t  -42  \n  ,   \"test_neg_float\":-39.24,\"bookstore\": {\"book\": [{\"category\": \"cooking\"\"title\": {\"lang\": \"en\",\"text\": \"Everyday Italian\"},\"author\": \"Giada De Laurentiis\",\"year\": 2005,\"price\": 30.00},{\"category\": \"children\",\"title\": {\"lang\": \"en\",\"text\": \"Harry Potter\"},\"author\": \"J K. Rowling\",\"year\": 2005,\"price\": 29.99}]}  \r      }    ");
+
+    if (jv.type != JSON_Null)
+        fail("SHOULD FAIL!");
 
     printf("COMPLETED TESTS\n");
 
