@@ -10,7 +10,8 @@
         "UNICODE",
         "_UNICODE",
         "__USE_MISC",
-        "__CHELPDEBUG__"
+        "__CHELPDEBUG__",
+        "_GNU_SOURCE"
       ],
       "cStandard": "c99",
       "cppStandard": "c++17"
@@ -28,7 +29,8 @@
         "UNICODE",
         "_UNICODE",
         "__USE_MISC",
-        "__CHELPDEBUG__"
+        "__CHELPDEBUG__",
+        "_GNU_SOURCE"
       ],
       "cStandard": "c99",
       "cppStandard": "c++17"
