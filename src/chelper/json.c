@@ -352,6 +352,15 @@ bool JSONArrayRemove(JSONArray ja, size_t i)
     return ArrayListRemoveX(ja->data, i);
 }
 
+ArrayList JSONKeys(JSON j)
+{
+    ArrayList l;
+
+    l = DictionaryKeys(j->data);
+
+    return l;
+}
+
 /*Adds the value to sb*/
 void JSONValueAddToStringBuilder(StringBuilder sb, JSONValue jv);
 

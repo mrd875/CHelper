@@ -34,6 +34,7 @@ struct JSONValue
 };
 
 #include "common.h"
+#include "arraylist.h"
 #include "string.h"
 
 /*Returns a jsonvalue object*/
@@ -83,6 +84,9 @@ bool JSONHas(JSON j, String k);
 
 /*Removes the key from the json object*/
 bool JSONRemove(JSON j, String k);
+
+/*Gets all the keys*/
+ArrayList JSONKeys(JSON j);
 
 /*Creates an empty json array*/
 JSONArray JSONArrayCreate();

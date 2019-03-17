@@ -7,6 +7,7 @@
 #include <chelper/common.h>
 #include <chelper/json.h>
 #include <chelper/string.h>
+#include <chelper/arraylist.h>
 
 void fail(String src)
 {
@@ -20,6 +21,7 @@ int main(void)
     JSON j, j2;
     JSONArray ja;
     JSONValue jv;
+    ArrayList keys;
     String str;
 
     j = JSONCreate();
@@ -53,7 +55,7 @@ int main(void)
 
     JSONFree(j);
 
-    jv = JSONParse("  {  \"\\\"escape string\": \"\nnew line\",  \"test_array\": [], \"test_array2\": [  1 , 4,  6, 7 ],   \"test_neg_int\"  : \t  -42  \n  ,   \"test_neg_float\":-39.24,\"bookstore\": {\"book\": [{\"category\": \"cooking\",\"title\": {\"lang\": \"en\",\"text\": \"Everyday Italian\"},\"author\": \"Giada De Laurentiis\",\"year\": 2005,\"price\": 30.00},{\"category\": \"children\",\"title\": {\"lang\": \"en\",\"text\": \"Harry Potter\"},\"author\": \"J K. Rowling\",\"year\": 2005,\"price\": 29.99}]}  \r      }    ");
+    jv = JSONParse("  {  \"\\\"escape string\": \"\nnew line\",  \"test_array\": [], \"test_array2\": [  1 , 4,  6, 7 ],   \"test_neg_int\"  : \t  -42  \n  ,   \"test_neg_float\":-39.24,\"bookstore\": {\"book\": [{\"category\": \"cooking\",\"title\": {\"lang\": \"en\",\"text\": \"Everyday Italian\"},\"author\": \"Giada De Laurentiis\",\"year\": 2005,\"price\": 30.00},{\"category\": \"children\",\"title\": {\"lang\": \"en\",\"text\": \"Harry Potter\"},\"author\": \"J K. Rowling\",\"year\": 2005,\"price\": 29.99}]}  \r  , \"test-obj\":  {  }    }    ");
 
     if (jv.type != JSON_Null)
     {
@@ -62,6 +64,10 @@ int main(void)
         str = JSONStringify(JSONValueObject(j));
         printf("\n\n%s\n", str);
         free(str);
+
+        keys = JSONKeys(j);
+        ArrayListPrintString(keys);
+        ArrayListFree(keys);
 
         JSONFree(j);
     }
